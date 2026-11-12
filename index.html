@@ -1,0 +1,2295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OAE Classroom Home Base — Prototype</title>
+<style>
+:root{--sidebar-w:240px;--bg:#f5f2ed;--panel:#fff;--ink:#303638;--muted:#737b7d;--line:#dedbd5;--teal:#8fbdb6;--pink:#d7a8ad;--yellow:#e4c878;--blue:#9db7c9;--purple:#b5a6c8;--green:#a9bea1}
+*{box-sizing:border-box} body{margin:0;height:100vh;display:flex;flex-direction:column;font-family:"Century Gothic",Avenir,Arial,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+button,input,textarea{font:inherit}.app{flex:1;min-height:0;height:auto;display:grid;grid-template-columns:var(--sidebar-w) 1fr;transition:grid-template-columns .2s ease}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:8px;z-index:10;overflow-y:auto;overflow-x:hidden}
+.logo{height:50px;display:grid;place-items:center;font-weight:700;font-size:12px;text-align:center;line-height:1.05;margin-bottom:6px}
+.tool{border:0;background:#f4f2ee;border-radius:12px;min-height:44px;padding:9px 10px;cursor:pointer;color:var(--ink);font-size:13px;text-align:left;display:flex;align-items:center;gap:9px}.tool b{display:inline-block;font-size:20px;margin:0;width:24px;text-align:center}.tool:hover{background:#ece8e1}.tool.active{outline:2px solid var(--teal);background:#eef7f5}
+.spacer{flex:1}.main{min-width:0;min-height:0;height:auto;display:flex;flex-direction:column}
+.topbar{height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:9px 14px}
+.brand{font-weight:700;margin-right:6px}.tabs{display:flex;gap:7px;overflow:auto;flex:1}.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;cursor:pointer}.tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.topbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+.stage{position:relative;flex:1;padding:12px;min-height:0}.framewrap{width:100%;height:100%;background:#242424;border-radius:14px;overflow:hidden;display:grid;place-items:center;box-shadow:0 5px 20px #00000014}
+iframe{width:100%;height:100%;border:0;background:#fff}.empty{text-align:center;color:#ddd;padding:30px}.empty h1{font-size:30px;color:#fff}
+.panel{position:absolute;left:26px;top:26px;width:min(390px,calc(100% - 52px));background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px #0003;padding:18px;z-index:20;display:none}.panel.show{display:block}
+.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.panelhead h2{margin:0;font-size:20px}.close{border:0;background:#eee9e3;border-radius:50%;width:34px;height:34px;cursor:pointer}
+.clockbig{font-size:48px;font-weight:700;text-align:center;margin:12px 0}.date{text-align:center;color:var(--muted)}
+.timerdisplay{font-size:56px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;margin:12px 0}.timerinputs{display:flex;justify-content:center;gap:8px}.timerinputs input{width:76px;padding:9px;border:1px solid var(--line);border-radius:9px;text-align:center}
+.actions{display:flex;gap:8px;justify-content:center;margin-top:13px}.actions button,.primary{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--teal);color:#fff}.actions .secondary{background:#ece8e1;color:var(--ink)}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical}.messageCard{font-size:32px;font-weight:700;text-align:center;padding:28px 14px;border-radius:14px;background:#f5f2ed;margin-top:12px;word-break:break-word}
+.modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;place-items:center;padding:20px}.modal.show{display:grid}.modalbox{width:min(570px,100%);background:#fff;border-radius:20px;padding:22px}.modalbox h2{margin-top:0}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px}.hint{font-size:12px;color:var(--muted);line-height:1.4}.error{font-size:12px;color:#a24b4b;min-height:18px;margin-top:5px}.manageRow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.manageRow .manageName{flex:1;font-weight:700}.deleteBtn{border:0;background:#f3e5e5;color:#8b3f3f;border-radius:9px;padding:8px 11px;cursor:pointer}
+.drawer{display:none;background:#faf9f7;border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:-3px;margin-bottom:3px}.drawer.show{display:block}.drawer .clockbig{font-size:32px;margin:5px 0}.drawer .timerdisplay{font-size:34px;margin:5px 0}.drawer .timerinputs{gap:4px}.drawer .timerinputs input{width:55px;padding:6px}.drawer .actions{margin-top:8px;gap:5px}.drawer .actions button{padding:7px 9px;font-size:12px}.drawer textarea{min-height:70px;font-size:12px}.drawer .messageCard{display:none}.memoBanner{position:absolute;top:0;left:0;z-index:15;width:100%;box-sizing:border-box;background:#f7bfd2;border:0;border-bottom:1px solid #df9bb5;border-radius:0;box-shadow:none;padding:9px 46px 9px 18px;font-size:19px;font-weight:700;text-align:center;display:none}.memoBanner.show{display:block}.memoClose{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:#eee9e3;border-radius:50%;width:28px;height:28px;cursor:pointer}.voiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.supplyGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.voiceBtn,.supplyBtn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 6px;cursor:pointer;font-size:12px}.supplyBtn{min-height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-width:2px}.supplyBtn.selected{box-shadow:0 0 0 3px #26303322 inset;transform:translateY(-1px)}.supplyIcon{font-size:34px;line-height:1}.supplyName{font-size:11px;font-weight:700;text-align:center;line-height:1.15}.voiceBtn.selected{color:#263033}.timerOverlay{position:absolute;top:54px;right:18px;z-index:14;display:none;background:#fff;border:3px solid #68c9c6;border-radius:20px;box-shadow:0 4px 16px #0002;padding:10px;text-align:center;width:170px;min-width:125px;max-width:360px;box-sizing:border-box;cursor:grab;user-select:none;touch-action:none}.timerOverlay.dragging{cursor:grabbing}.timerOverlay.show{display:block}.timerOverlay .timerLabel{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.timerOverlay .timerValue{font-size:clamp(34px,calc(var(--timer-scale,1)*38px),70px);font-weight:800;line-height:1.05;margin:2px 0 7px}.timerTrack{height:16px;border-radius:999px;background:#e8eceb;overflow:hidden;border:1px solid #d2d8d6}.timerFill{height:100%;width:100%;background:#68c9c6;transition:width .35s linear,background .2s ease}.timerOverlay.ending{border-color:#ee8eb0}.timerOverlay.ending .timerFill{background:#ee8eb0}.timerOverlay.countdown-only .timerTrack{display:none}.timerResize{position:absolute;right:-6px;bottom:-6px;width:18px;height:18px;border-radius:50%;background:#68c9c6;border:3px solid #fff;box-shadow:0 1px 5px #0003;cursor:nwse-resize;touch-action:none}.statusStrip{position:absolute;bottom:0;left:0;z-index:14;display:flex;gap:12px;align-items:center;width:100%;box-sizing:border-box;justify-content:center;pointer-events:none;background:#d9f3f1;border-top:1px solid #9fd7d3;padding:6px 12px;min-height:58px}.statusChip{background:transparent;border:0;box-shadow:none;border-radius:0;padding:7px 12px;font-weight:800;font-size:16px;pointer-events:auto;white-space:nowrap}.suppliesDisplay{background:transparent;border:0;box-shadow:none;border-radius:0;padding:0;display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:100%;pointer-events:auto}.suppliesLabel{display:flex;align-items:center;padding:0 8px 0 5px;font-size:15px;font-weight:800;white-space:nowrap}.studentSupply{width:auto;min-width:54px;text-align:center;padding:4px 6px;border-radius:9px;border:1.5px solid transparent;display:flex;flex-direction:column;justify-content:center}.studentSupply .bigIcon{display:block;font-size:23px;line-height:1;margin-bottom:2px}.studentSupply small{font-size:9px;font-weight:700;line-height:1.05}.settingsSection{padding:13px 0;border-bottom:1px solid var(--line)}.settingsSection h3{margin:0 0 8px;font-size:15px}.settingsRow{display:grid;grid-template-columns:58px 1fr 46px 38px;gap:7px;margin:7px 0;align-items:center}.settingsRow input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px}.miniDelete{border:0;background:#f3e5e5;color:#8b3f3f;border-radius:8px;height:34px;cursor:pointer}.customAdd{display:flex;gap:7px;margin-top:9px}.customAdd input{flex:1;padding:9px;border:1px solid var(--line);border-radius:8px}.drawerLabel{font-size:11px;font-weight:700;color:var(--muted);margin:3px 0 7px}.collapsed{grid-template-columns:0 1fr}.collapsed .sidebar{display:none}
+@media(max-width:700px){.sidebar{padding:8px 5px}.brand{display:none}.topbar{padding:8px}.stage{padding:6px}}
+
+.brand-strip{height:7px;background:linear-gradient(90deg,#d9779d 0 20%,#ef8d72 20% 40%,#e4bd3d 40% 60%,#3aa9a5 60% 80%,#69a9cf 80%)}
+.topHeader{background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.topBrand{display:flex;align-items:center;gap:12px}.topBrandTitle{font-size:20px;font-weight:800}.topBrandSub{font-size:11px;color:var(--muted)}
+.topActions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.headerBtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;font-weight:700;cursor:pointer;text-decoration:none;color:var(--ink)}
+.headerBtn:hover{border-color:var(--teal)}.headerBtn.oae{border-color:#d9779d;color:#b9567d}
+.appFooter{text-align:center;color:var(--muted);font-size:11px;padding:7px 12px;background:#fff;border-top:1px solid var(--line)}.appFooter a{color:#b9567d;font-weight:800;text-decoration:none}
+.infoModal{position:fixed;inset:0;background:#26323870;z-index:80;display:none;align-items:center;justify-content:center;padding:18px}.infoModal.show{display:flex}.infoCard{background:#fff;border:1px solid var(--line);border-radius:16px;width:min(680px,96vw);max-height:84vh;overflow:auto;padding:22px;box-shadow:0 20px 70px #26323840}.infoCard h2{margin:0 0 12px}.infoCard h3{margin:18px 0 5px;font-size:16px}.infoCard p,.infoCard li{font-size:13px;line-height:1.5}.infoCard ul{padding-left:20px}.infoCloseRow{display:flex;justify-content:flex-end;margin-top:18px}
+.sidebarFooter{margin-top:auto;padding:10px 8px 5px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:10px;line-height:1.35}.sidebarFooter a{color:#b9567d;font-weight:800;text-decoration:none}.sidebarFooter a:hover{text-decoration:underline}.sidebar.collapsed .sidebarFooter{display:none}
+.topChrome{flex:none}.topChrome.chromeHidden{display:none!important}.chromeReopen{position:absolute;top:8px;right:10px;z-index:35;display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px #0002}.chromeReopen.show{display:block}
+
+.memoColorRow{display:flex;align-items:center;gap:10px;margin-top:9px}.memoColorRow input[type=color]{width:48px;height:36px;padding:2px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.stopwatchOverlay{position:absolute;top:150px;right:18px;z-index:14;display:none;background:#fff;border:3px solid #b5a6c8;border-radius:20px;box-shadow:0 4px 16px #0002;padding:10px;text-align:center;width:170px;min-width:125px;max-width:360px;box-sizing:border-box;cursor:grab;user-select:none;touch-action:none}.stopwatchOverlay.show{display:block}.stopwatchOverlay.dragging{cursor:grabbing}.stopwatchOverlay .swLabel{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.stopwatchOverlay .swValue{font-size:clamp(34px,calc(var(--sw-scale,1)*38px),70px);font-weight:800;line-height:1.05;margin:3px 0}.swResize{position:absolute;right:-6px;bottom:-6px;width:18px;height:18px;border-radius:50%;background:#b5a6c8;border:3px solid #fff;box-shadow:0 1px 5px #0003;cursor:nwse-resize;touch-action:none}
+.chromeReopen{display:none!important}
+
+.tool.brandTool{background:var(--tool-bg);border:1.5px solid var(--tool-border);font-weight:700}
+.tool.brandTool:hover{background:var(--tool-bg);box-shadow:0 2px 8px #26323818;transform:translateY(-1px)}
+.tool.brandTool.active{outline:2px solid var(--tool-border);outline-offset:1px;background:var(--tool-bg)}
+.tool.brandTool b{color:#394346}
+.sidebarFooter{margin-top:auto;padding:13px 5px 5px;border-top:1px solid var(--line);text-align:center;font-size:12px}
+.sidebarFooter a{color:#d9779d!important;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.sidebarFooter a:hover{text-decoration:underline}
+.sidebarFooter a span{font-size:14px}
+
+.overlayClose{position:absolute;top:5px;right:6px;width:24px;height:24px;border:0;border-radius:50%;background:#f3f5f5;color:#667174;font-size:16px;font-weight:800;line-height:1;cursor:pointer;display:grid;place-items:center}.overlayClose:hover{background:#e7ebeb;color:#263238}
+.timerQuickControls{display:flex;justify-content:center;gap:5px;margin-top:8px}.timerQuickControls button{border:1px solid #cfd9d8;background:#fff;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}.timerQuickControls button:hover{border-color:#68c9c6;background:#f4fbfa}
+
+.presetColorGrid{display:grid;grid-template-columns:repeat(6,34px);gap:9px;margin-top:10px}
+.colorSwatch{width:34px;height:34px;border-radius:9px;border:2px solid #fff;box-shadow:0 0 0 1px #cbd4d4;cursor:pointer;padding:0}
+.colorSwatch:hover{transform:translateY(-1px);box-shadow:0 2px 7px #0002}
+.colorSwatch.selected{box-shadow:0 0 0 3px #263238}
+.voiceSwatches{display:flex;gap:5px;flex-wrap:wrap;grid-column:1/-1;padding:2px 0 5px}
+.voiceSwatches .colorSwatch{width:27px;height:27px;border-radius:7px}
+
+.clockOverlay{position:absolute;top:54px;left:18px;z-index:14;display:none;background:#fff;border:3px solid #69a9cf;border-radius:20px;box-shadow:0 4px 16px #0002;padding:10px;text-align:center;width:190px;min-width:130px;max-width:360px;box-sizing:border-box;cursor:grab;user-select:none;touch-action:none}.clockOverlay.show{display:block}.clockOverlay.dragging{cursor:grabbing}.clockOverlay .clockLabel{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.clockOverlay .clockValue{font-size:clamp(30px,calc(var(--clock-scale,1)*36px),68px);font-weight:800;line-height:1.05;margin:4px 0}.clockOverlay .clockSlideDate{font-size:clamp(12px,calc(var(--clock-scale,1)*14px),23px);font-weight:700;line-height:1.3;color:#485467;white-space:nowrap;margin:3px 0 5px}.clockResize{position:absolute;right:-6px;bottom:-6px;width:18px;height:18px;border-radius:50%;background:#69a9cf;border:3px solid #fff;box-shadow:0 1px 5px #0003;cursor:nwse-resize;touch-action:none}
+
+.colorEditWrap{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px}
+.currentColorSwatch{width:38px;height:38px;border-radius:9px;border:2px solid #fff;box-shadow:0 0 0 1px #cbd4d4}
+.colorEditBtn{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:14px;display:grid;place-items:center}.colorEditBtn:hover{border-color:var(--teal);background:#f7fbfb}
+.colorPalettePopover{display:none;position:absolute;top:45px;left:0;z-index:95;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 8px 28px #26323830;width:250px}
+.colorPalettePopover.show{display:grid;grid-template-columns:repeat(6,30px);gap:8px}
+.colorPalettePopover .colorSwatch{width:30px;height:30px}
+.voiceColorCompact{display:flex;align-items:center;gap:5px;position:relative}
+.voiceColorCompact .currentColorSwatch{width:30px;height:30px;border-radius:7px}
+.voiceColorCompact .colorEditBtn{width:27px;height:27px}
+.voiceColorCompact .colorPalettePopover{top:36px;left:auto;right:0}
+.settingsCard{max-height:84vh;overflow-y:auto;overflow:visible}
+
+.tab.active{color:var(--ink)!important;box-shadow:0 0 0 3px #111!important;font-weight:800}
+
+.app.collapsed{grid-template-columns:0 minmax(0,1fr)!important}
+.app.collapsed .sidebar{display:none!important;width:0!important;min-width:0!important;overflow:hidden!important}
+.app.collapsed .main{grid-column:2;min-width:0!important;width:100%!important}
+#showTools{display:none;position:fixed;top:12px;left:12px;z-index:2147483647;align-items:center;gap:5px;border:1px solid #cbd4d4;border-radius:11px;background:#fff;color:#263033;box-shadow:0 3px 16px #0003;padding:9px 13px;font:700 13px inherit;cursor:pointer}
+.app.collapsed #showTools{display:flex!important}
+#showTools:hover{background:#f1faf9}
+
+.emptyAddPresentation{margin-top:14px;border:0;border-radius:12px;background:#fff;color:var(--ink);padding:11px 18px;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 2px 10px #0003}
+.emptyAddPresentation:hover{transform:translateY(-1px);box-shadow:0 4px 14px #0004}
+
+.tab[draggable="true"]{cursor:grab}
+.tab[draggable="true"]:active{cursor:grabbing}
+.tab.dragging{opacity:.45}
+.tab.dragBefore{box-shadow:-4px 0 0 #111}
+.tab.dragAfter{box-shadow:4px 0 0 #111}
+.tab.active.dragBefore{box-shadow:0 0 0 3px #111,-5px 0 0 #111!important}
+.tab.active.dragAfter{box-shadow:0 0 0 3px #111,5px 0 0 #111!important}
+
+
+/* Presentation-safe layout:
+   the memo/footer occupy reserved stage space while the embedded slide
+   continues to fill 100% of the remaining presentation frame. */
+.stage{
+ --memo-reserve:0px;
+ --status-reserve:58px;
+ padding:calc(8px + var(--memo-reserve)) 8px calc(8px + var(--status-reserve));
+ overflow:hidden;
+ transition:padding-top .16s ease,padding-bottom .16s ease;
+}
+.framewrap{width:100%;height:100%}
+.stage #viewerHost{width:100%!important;height:100%!important;position:relative}.stage .presentationFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#242424}
+
+/* Settings must remain usable on shorter laptop/projector screens. */
+#settingsModal{
+ overflow-y:auto!important;
+ align-items:flex-start!important;
+ padding:20px!important;
+}
+#settingsModal .modalbox{
+ max-height:calc(100vh - 40px)!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ margin:auto!important;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+}
+
+/* V3 additions: scalable bottom bar, class tools, and student-facing picker/group displays */
+.statusStrip.status-medium{gap:16px;padding:9px 16px;min-height:78px}
+.statusStrip.status-medium .statusChip{font-size:20px!important;padding:10px 15px!important}
+.statusStrip.status-medium .suppliesLabel{font-size:18px}
+.statusStrip.status-medium .studentSupply{min-width:68px;padding:6px 8px}
+.statusStrip.status-medium .studentSupply .bigIcon{font-size:30px}
+.statusStrip.status-medium .studentSupply small{font-size:11px}
+.statusStrip.status-large{gap:20px;padding:12px 20px;min-height:102px}
+.statusStrip.status-large .statusChip{font-size:25px!important;padding:13px 18px!important}
+.statusStrip.status-large .suppliesLabel{font-size:22px}
+.statusStrip.status-large .studentSupply{min-width:82px;padding:8px 10px}
+.statusStrip.status-large .studentSupply .bigIcon{font-size:38px}
+.statusStrip.status-large .studentSupply small{font-size:13px}
+.segmented{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.segmented label{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:#fff;cursor:pointer}
+.classListBox{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:9px;font:inherit}
+.toolSelect{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;margin:5px 0 8px}
+.pickerResultOverlay,.groupsResultOverlay{position:absolute;z-index:18;display:none;background:#fff;border:3px solid #69a9cf;border-radius:20px;box-shadow:0 8px 30px #0003;box-sizing:border-box}
+.pickerResultOverlay.show,.groupsResultOverlay.show{display:block}
+.pickerResultOverlay{left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,75%);padding:24px 50px;text-align:center}
+.pickerResultLabel{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.pickerResultName{font-size:clamp(38px,6vw,76px);font-weight:800;line-height:1.08;margin:10px 0}
+.groupsResultOverlay{
+ left:50%;right:auto;top:50%;bottom:auto;
+ transform:translate(-50%,-50%);
+ width:max-content;max-width:min(90%,980px);
+ height:auto;max-height:82%;
+ padding:20px;overflow:auto;
+}
+.groupsTitle{text-align:center;font-size:25px;font-weight:800;margin:0 38px 16px}
+.groupsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.groupCard{border:2px solid #b9ddd9;background:#f8fcfb;border-radius:14px;padding:12px}
+.groupCard b{display:block;font-size:16px;margin-bottom:7px}
+.groupCard div{font-size:17px;line-height:1.45}
+.overlayClose.toolOverlayClose{position:absolute;right:10px;top:10px}
+.backupActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.backupActions button{padding:9px 12px}
+
+.classSelectorWrap{display:flex;align-items:center;gap:6px;margin-left:auto}.classSelectorWrap label{font-size:12px;font-weight:800;color:var(--muted)}.classSelector{max-width:180px;min-width:115px;border:1px solid var(--line);border-radius:9px;padding:7px;background:#fff;font:inherit;font-size:13px;font-weight:700}.classTabs{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}.classTab{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 10px;font:inherit;font-weight:700}.classTab.active{box-shadow:0 0 0 2px #111}.classEditor{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafcfc}.classNameInput{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font:inherit;font-weight:700;margin:6px 0}.classSettingsActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
+/* V12 quick-hide X controls for projected bars */
+.barQuickClose,.memoClose{
+ position:absolute;right:8px;top:50%;transform:translateY(-50%);
+ width:22px;height:22px;min-width:22px;padding:0;border:1px solid #0002;border-radius:50%;
+ background:#ffffffcc;color:#394346;font:700 15px/20px Arial,sans-serif;cursor:pointer;
+ display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:3;
+}
+.barQuickClose:hover,.memoClose:hover{background:#fff}
+.statusStrip{position:absolute}
+
+.resultQuickControls{display:flex;justify-content:center;margin-top:10px}
+.resultQuickControls button{
+ border:1px solid #0002;border-radius:9px;background:#fff;padding:7px 12px;
+ font:700 13px/1 Century Gothic,Arial,sans-serif;color:#394346;cursor:pointer;
+ box-shadow:0 1px 3px #00000012;
+}
+.resultQuickControls button:hover{box-shadow:0 2px 7px #00000020;transform:translateY(-1px)}
+
+.groupsResultOverlay .groupsGrid{width:auto;max-width:100%}
+
+/* V16: movable Random Name + Groups popouts */
+.pickerResultOverlay,.groupsResultOverlay{cursor:grab;user-select:none;touch-action:none}
+.pickerResultOverlay.dragging,.groupsResultOverlay.dragging{cursor:grabbing}
+.pickerResultOverlay button,.groupsResultOverlay button{cursor:pointer}
+.groupsResultOverlay{
+ overflow:visible!important;
+ max-height:none!important;
+ width:max-content;
+ max-width:94%;
+}
+.groupsResultOverlay .groupsGrid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
+ gap:8px;
+ width:min(900px,78vw);
+ max-width:100%;
+}
+.groupsResultOverlay .groupCard{padding:8px 10px}
+.groupsResultOverlay .groupCard b{font-size:14px;margin-bottom:4px}
+.groupsResultOverlay .groupCard div{font-size:15px;line-height:1.25}
+.groupsResultOverlay .groupsTitle{font-size:21px;margin-bottom:10px}
+
+/* V17: resize handles for Random Name + Groups */
+.pickerResultOverlay,.groupsResultOverlay{min-width:220px;min-height:130px}
+/* Visible pastel circular resize handles, matching the Clock and Timer popups. */
+.resultResize{
+ position:absolute;right:-6px;bottom:-6px;width:18px;height:18px;
+ border-radius:50%;background:#69a9cf;border:3px solid #fff;
+ box-shadow:0 1px 5px #0003;cursor:nwse-resize;touch-action:none;
+ z-index:25;box-sizing:content-box;
+}
+.resultResize::after{content:none}
+/* Match the Clock handle: circle overlaps the outer corner. */
+.groupsResultOverlay .resultResize{background:#68c9c6;right:-6px;bottom:-6px;width:18px;height:18px;border:3px solid #fff;box-sizing:content-box;z-index:30}
+.groupsResultOverlay .groupsGrid{
+ width:100%!important;
+ box-sizing:border-box;
+}
+
+/* V18: scale result-window typography with the resized box */
+.pickerResultOverlay,.groupsResultOverlay{
+ container-type:size;
+}
+.pickerResultOverlay .pickerResultLabel{
+ font-size:clamp(11px,4cqh,16px);
+}
+.pickerResultOverlay .pickerResultName{font-size:48px;line-height:1.05;overflow-wrap:anywhere;text-align:center}
+.pickerResultOverlay .resultQuickControls button{
+ font-size:clamp(10px,3.5cqh,13px);
+ padding:clamp(4px,1.5cqh,7px) clamp(7px,2cqw,12px);
+}
+
+.groupsResultOverlay .groupsTitle{
+ font-size:clamp(14px,4cqh,21px)!important;
+ margin-bottom:clamp(4px,1.5cqh,10px)!important;
+}
+.groupsResultOverlay .groupsGrid{
+ gap:clamp(3px,1cqh,8px)!important;
+ grid-template-columns:repeat(auto-fit,minmax(min(135px,28cqw),1fr))!important;
+}
+.groupsResultOverlay .groupCard{
+ padding:clamp(3px,1cqh,8px) clamp(5px,1.2cqw,10px)!important;
+}
+
+
+.groupsResultOverlay .resultQuickControls{
+ margin-top:clamp(4px,1cqh,10px);
+}
+.groupsResultOverlay .resultQuickControls button{
+ font-size:clamp(9px,2.4cqh,13px);
+ padding:clamp(3px,.8cqh,7px) clamp(6px,1.5cqw,12px);
+}
+
+/* V20: Random Name always stays intact on one line */
+.pickerResultOverlay .pickerResultName{
+ white-space:nowrap!important;
+ word-break:normal!important;
+ overflow-wrap:normal!important;
+ max-width:100%;
+ text-align:center;
+}
+
+/* V21: Groups content must always remain inside its white popout */
+.groupsResultOverlay{overflow:visible!important}
+.groupsResultOverlay .groupsGrid{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.groupsResultOverlay .groupCard{box-sizing:border-box;min-width:0!important;max-width:100%!important}
+.groupsResultOverlay .resultQuickControls{position:relative;z-index:2}
+
+/* V23: default Groups popout hugs its content—no unused white lower half */
+.groupsResultOverlay{
+ align-content:start;
+}
+.groupsResultOverlay .groupsGrid{
+ align-content:start;
+}
+
+/* V24: enlarged Groups window uses the space for larger projected cards/text */
+.groupsResultOverlay.show{
+ display:flex!important;
+ flex-direction:column;
+}
+.groupsResultOverlay .groupsTitle{flex:0 0 auto}
+.groupsResultOverlay .groupsGrid{
+ flex:1 1 auto;
+ min-height:0;
+}
+.groupsResultOverlay .resultQuickControls{flex:0 0 auto}
+
+/* V28: equal group cards + projector-readable names */
+.groupsResultOverlay .groupsGrid{grid-auto-rows:1fr!important}
+.groupsResultOverlay .groupCard{
+ width:auto!important;
+ height:auto!important;
+ min-height:0!important;
+}
+
+/* V29 authoritative projector typography */
+.groupsResultOverlay .groupCard b{
+ font-size:var(--group-label-font,16px)!important;
+}
+.groupsResultOverlay .groupCard div{
+ font-size:var(--group-student-font,22px)!important;
+}
+/* Names are the priority inside each card. */
+.groupsResultOverlay .groupCard{
+ justify-content:center!important;
+}
+
+/* V33: large groups grow vertically with their student lists instead of becoming square */
+.groupsResultOverlay.largeGroupMode .groupsGrid{
+ height:auto!important;
+ flex:0 0 auto!important;
+ grid-template-rows:none!important;
+ grid-auto-rows:auto!important;
+ align-content:start!important;
+}
+.groupsResultOverlay.largeGroupMode .groupCard{
+ height:auto!important;
+ min-height:0!important;
+ justify-content:flex-start!important;
+}
+
+/* V35: preserve V33 default exactly; expand content only after teacher resizes */
+.groupsResultOverlay.largeGroupMode.manualGroupResize .groupsGrid{
+ flex:1 1 auto!important;
+ height:100%!important;
+ min-height:0!important;
+ align-content:stretch!important;
+}
+.groupsResultOverlay.largeGroupMode.manualGroupResize .groupCard{
+ height:100%!important;
+ justify-content:center!important;
+}
+
+/* V36: only after the teacher resizes, let the large-group grid occupy the resized box */
+.groupsResultOverlay.largeGroupMode.manualGroupResize .groupsGrid{
+ flex:1 1 auto!important;
+ min-height:0!important;
+ grid-auto-rows:1fr!important;
+ align-content:stretch!important;
+}
+.groupsResultOverlay.largeGroupMode.manualGroupResize .groupCard{
+ min-height:0!important;
+ height:100%!important;
+ justify-content:center!important;
+}
+
+/* Saved YouTube library: compact, sortable cards */
+.videoInput{width:100%;box-sizing:border-box;margin:3px 0 7px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:12px}
+.videoColorChoices{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.videoColorChoice{width:23px;height:23px;border-radius:7px;border:1px solid #7775;cursor:pointer}.videoColorChoice.chosen{outline:2px solid #303638;outline-offset:2px}
+.videoFormError{color:#a53b4d;font-size:11px;min-height:15px}.savedVideoList{display:flex;flex-direction:column;gap:8px;margin:8px 0 10px}
+.savedVideoRow{display:flex;align-items:center;gap:5px;min-height:45px;border:1px solid #d7d5d1;background:var(--video-color,#e3f0f8);border-radius:12px;padding:5px 6px;box-sizing:border-box}
+.savedVideoRow.dragging{opacity:.42}.savedVideoRow.dragOver{outline:2px dashed #4c7e86;outline-offset:2px}
+.videoDragHandle{flex:0 0 auto;border:0;background:transparent;color:#4b5255;cursor:grab;font-size:17px;padding:4px 2px;touch-action:none}
+.savedVideoTitle{flex:1;min-width:0;text-align:left;border:0;background:none;font-weight:700;cursor:pointer;padding:5px 2px;font-size:12px;overflow-wrap:anywhere;color:#253236}
+.savedVideoActions{display:flex;gap:3px;flex:0 0 auto}.savedVideoActions button{display:grid;place-items:center;width:27px;height:29px;font-size:15px;padding:0;background:#ffffffb9;border:1px solid #ffffffb0;border-radius:8px;cursor:pointer;color:#27383b}.savedVideoActions button:hover{background:#fff}.savedVideoActions .videoDelete{color:#ad243c;font-size:18px}.savedVideoActions .videoDelete:hover{background:#ffe3e6}
+.savedVideoEmpty{font-size:12px;color:var(--muted);padding:5px 0}.videoAddBtn{display:flex;align-items:center;justify-content:center;width:100%;padding:8px;border:1px dashed #9eb8c0;background:#f0f8fa;border-radius:10px;font-weight:700;cursor:pointer;color:#315d66}.videoEditor{margin-top:10px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:11px}.videoEditor[hidden]{display:none!important}
+.videoFloat{display:none;position:absolute;z-index:30;left:40px;top:55px;width:520px;height:340px;min-width:245px;min-height:185px;max-width:calc(100% - 8px);max-height:calc(100% - 8px);border:3px solid #69a9cf;border-radius:13px;background:white;box-shadow:0 8px 30px #0004;overflow:hidden;box-sizing:border-box}.videoFloat.show{display:flex;flex-direction:column}.videoFloatHead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;background:#e3f0f8;cursor:grab;touch-action:none;user-select:none;font-weight:700;font-size:13px}.videoFloatHead span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.videoFloatClose{border:0;background:#fff;border-radius:50%;width:25px;height:25px;font-size:21px;cursor:pointer;flex-shrink:0}.videoFloatBody{flex:1;min-height:0;background:#151515}.videoFloatBody iframe{display:block;width:100%;height:100%;border:0}.videoFloatResize{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 50%,#69a9cf 51%)}
+.toolLineIcon{width:25px;height:25px;display:block;margin:auto}.bookmarkTrashIcon{width:15px;height:15px;display:block}.savedVideoActions .videoDelete{font-size:14px}
+
+/* Teacher-customizable tool order: tool and its drawer travel together. */
+.sidebar .brandTool{cursor:grab}
+.sidebar .brandTool:active{cursor:grabbing}
+.sidebar .brandTool.toolDragging{opacity:.4}
+.sidebar .brandTool.toolDropTarget{outline:2px dashed #509d99;outline-offset:2px}
+
+/* V65: optional one-level presentation folders */
+.topbar{height:auto;min-height:62px}
+.presentationNav{display:flex;flex-direction:column;min-width:130px;flex:1;gap:5px}
+.presentationNav .tabs{flex:none;min-height:35px;align-items:center}
+.folderChildTabs{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:4px 4px 5px 18px;border-top:1px dashed #d9dedd;min-height:40px}
+.folderChildTabs[hidden]{display:none!important}
+.folderTab{font-weight:800;display:inline-flex;gap:6px;align-items:center}
+.folderTab.open{outline:2px solid #303638;outline-offset:1px}
+.folderTab.dragTarget{outline:3px dashed #3aa9a5;outline-offset:2px}
+.folderTab .folderGlyph{font-size:15px}
+.folderChildTabs .tab{font-size:12px;padding:7px 11px}
+.folderHint{color:#687578;font-size:11px;white-space:nowrap}
+.folderSelect{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+.folderManageHeading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 7px}
+.folderManageRow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.folderManageRow input{width:100%;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;font:inherit;font-weight:700}
+.folderDropZone{background:#e5f8f4!important;outline:2px dashed #3aa9a5!important}
+.folderDeleteChoice{display:flex;align-items:flex-start;gap:12px;padding:13px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.folderDeleteChoice input{margin-top:4px;accent-color:#2b8886}.folderDeleteChoice span{display:grid;gap:5px}.folderDeleteChoice small{font-size:12px;color:var(--muted);line-height:1.4}.folderDeleteChoice:has(input:checked){border-color:#54aaa6;background:#edf9f7}
+
+/* V67: compact class picker and floating presentation-folder flyouts */
+.topbar{height:62px;min-height:62px;flex-wrap:nowrap;gap:6px;padding:7px 9px}
+.topbar .brand{font-size:12px;white-space:nowrap;margin-right:2px}
+.presentationNav{min-width:65px;flex:1;overflow:hidden;display:block}
+.presentationNav .tabs{display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;min-height:39px;gap:5px}
+.presentationNav .tab{padding:7px 10px;font-size:12px}
+.topbar .topbtn,.topbar .smallbtn{white-space:nowrap;font-size:12px;padding:7px 8px;flex-shrink:0}
+.classMenuWrap{position:relative;flex-shrink:0}
+.classMenuButton{max-width:135px;overflow:hidden;text-overflow:ellipsis}
+.classMenu{position:absolute;right:0;top:calc(100% + 7px);width:max-content;min-width:170px;max-width:260px;max-height:310px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 35px #0003;padding:6px;z-index:130}
+.classMenu[hidden],.folderFlyout[hidden]{display:none!important}
+.classMenu button{display:block;width:100%;border:0;background:transparent;text-align:left;border-radius:8px;padding:10px;cursor:pointer;font-size:13px}
+.classMenu button:hover,.classMenu button.selected{background:#eaf6f4}
+.folderFlyout{position:fixed;z-index:140;min-width:175px;max-width:min(290px,85vw);max-height:65vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 36px #0003;padding:6px;display:flex;flex-direction:column;gap:3px}
+.folderFlyout .tab{display:block;width:100%;text-align:left;border-radius:8px;padding:9px 12px;font-size:12px;white-space:normal;cursor:pointer}
+.folderFlyout .folderHint{font-size:12px;padding:10px;color:var(--muted)}
+.folderFlyout.folderDropZone{outline:3px dashed #3aa9a5}
+@media(max-width:900px){.topbar .brand{display:none}.topbar{gap:4px}.topbar .topbtn,.topbar .smallbtn{padding:7px 6px}}
+
+/* V71: compact, usable class folders and drag-to-reorder class lists */
+.classFolderInlineList[hidden]{display:none!important}
+.classFolderInlineList{margin:1px 0 5px 13px;padding-left:8px;border-left:3px solid #e5eeee}
+.classFolderInlineList button{padding:8px 10px!important}
+.classFolderMenuItem:hover>.classFolderSubmenu{display:none!important}
+#classesModal .classTabs{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;align-items:stretch;gap:4px}
+#classesModal .classTab{text-align:left;cursor:grab;margin-left:18px}
+#classesModal .classTabFolderHeading{padding:8px 10px;border-radius:7px;background:#f3f7f7;font-size:13px;font-weight:800;cursor:grab;margin-top:6px}
+#classesModal .classDragOver{outline:2px dashed #45a7a0;background:#dff5f1!important}
+.classFolderRow{cursor:grab}
+</style>
+<style>
+.timeModeTabs{display:flex;gap:6px;margin:8px 0 4px}
+.timeModeBtn{flex:1;border:1px solid #e4bd3d;border-radius:9px;padding:8px;background:#fff;cursor:pointer;font-weight:700;color:#4c4c4c}
+.timeModeBtn.active{background:#fff1c9;border-color:#d4a82a}
+</style><style>
+/* Consistent icon sizing for all sidebar tools */
+.tool.brandTool b{width:26px;height:26px;flex:0 0 26px;display:flex;align-items:center;justify-content:center;margin:0;line-height:1}
+.tool.brandTool .toolLineIcon{width:24px!important;height:24px!important;display:block;margin:0;flex:none}
+</style>
+<style>
+#timerOverlay .timerQuickControls{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:8px}
+#timerOverlay .timerQuickControls button{flex:1 1 auto;min-width:57px;padding:6px 7px;font-size:11px;white-space:nowrap}
+</style><style>
+/* V48: separate playback from the tinted time adjustments */
+#timerOverlay .timerPlaybackRow{display:flex;justify-content:center;gap:7px;margin:9px 0 7px}
+#timerOverlay .timerPlaybackRow button{background:#68c9c6;color:#163b3b;border:1px solid #47aca9;border-radius:9px;font-weight:800;min-width:0;flex:1;padding:8px 8px;cursor:pointer}
+#timerOverlay #timerOverlayReset{background:#f3f5f5;border-color:#d4dddd;color:#465354}
+#timerOverlay .timerQuickControls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:0}
+#timerOverlay .timerQuickControls button{min-width:0;white-space:nowrap;background:#e1f4f1;color:#245c59;border:1px solid #a6d9d3;border-radius:9px;padding:7px 5px;font-weight:700;font-size:11px;cursor:pointer}
+#timerOverlay .timerQuickControls button:hover{background:#c8eae5}
+/* Fullscreen the whole document, not the presentation stage or app subtree.
+   This preserves the header, tool sidebar, stage banners, and floating tools. */
+html:fullscreen{width:100%;height:100%;background:var(--bg)}
+html:fullscreen body{width:100%;height:100%;min-height:0}
+html:fullscreen .app{min-height:0;min-width:0}
+.classEditShortcut{flex-shrink:0;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;padding:7px 9px;font-size:17px;line-height:1;color:#445b5a}.classEditShortcut:hover{background:#eaf6f4}
+#classesModal{overflow-y:auto;align-items:flex-start;padding:20px}
+#classesModal .classesModalBox{width:min(680px,100%);max-height:calc(100vh - 40px);overflow-y:auto;margin:auto;overscroll-behavior:contain}
+#classesModal .classTabs{max-height:145px;overflow-y:auto}
+</style><style>
+/* V69 class folders and compact presentation controls */
+.classMenu{overflow:visible;max-height:none;min-width:200px;max-width:270px}
+.classMenuScroll{max-height:310px;overflow-y:auto;overflow-x:visible}
+.classFolderMenuItem{position:relative}
+.classMenu .classFolderMenuItem>button{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.classFolderSubmenu{position:absolute;right:calc(100% - 2px);top:-5px;min-width:185px;max-width:260px;max-height:310px;overflow:auto;background:white;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #0003;padding:6px;z-index:160}
+.classFolderSubmenu[hidden]{display:none!important}
+.classFolderMenuItem:hover>.classFolderSubmenu,.classFolderMenuItem:focus-within>.classFolderSubmenu{display:block!important}
+.classFolderManager{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}
+.classFolderRow{display:flex;gap:8px;align-items:center;padding:7px 3px;border-bottom:1px solid #0001;flex-wrap:wrap}
+.classFolderRow .classFolderName{flex:1;min-width:110px;font-weight:700;font-size:13px}
+.classFolderRow button{border:1px solid var(--line);border-radius:7px;background:white;padding:5px 8px;cursor:pointer}
+.classFolderRow button:disabled{opacity:.35;cursor:default}
+.classFolderDot{width:16px;height:16px;border:1px solid #0003;border-radius:5px;flex:none}
+.classFolderDeleteOptions{display:grid;gap:10px;margin:14px 0}
+.classFolderDeleteOptions label{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.classFolderDeleteOptions small{display:block;margin-top:5px;color:var(--muted)}
+.classMenuWrap{z-index:145}
+</style>
+</head>
+<body><div class="topChrome" id="topChrome"><div class="brand-strip"></div>
+<div class="topHeader">
+ <div class="topBrand"><div><div class="topBrandTitle">Classroom Home Base</div><div class="topBrandSub">Tools &amp; Apps · your student-facing classroom command center</div></div></div>
+ <div class="topActions">
+  <button class="headerBtn" id="tipsFaqBtn">Tips &amp; FAQs</button>
+  <button class="headerBtn" id="settingsTop">⚙ Settings</button>
+  <a class="headerBtn oae" href="https://www.teacherspayteachers.com/store/organize-and-educate/category-digital-teacher-systems-1579330" target="_blank" rel="noopener noreferrer">More OAE Tools ↗</a>
+ </div>
+</div></div>
+<div class="app" id="app">
+ <aside class="sidebar">
+  <button class="tool brandTool" data-drawer="clockDrawer" style="--tool-bg:#fde3ec;--tool-border:#ee8eb0"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></b><span>Clock</span></button>
+  <div class="drawer" id="clockDrawer"><div class="clockbig" id="clockTime"></div><div class="date" id="clockDate"></div><button class="primary" id="clockDisplayBtn" style="margin-top:8px;width:100%">Display on Presentation</button></div>
+  <button class="tool brandTool" data-drawer="timerDrawer" style="--tool-bg:#fff1c9;--tool-border:#e4bd3d"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v5l3 2M9 2h6M12 2v3M18 6l2-2"/></svg></b><span>Timer</span></button>
+  <div class="timeModeTabs" id="timeModeTabs" style="display:none"><button type="button" class="timeModeBtn active" id="chooseTimer">Timer</button><button type="button" class="timeModeBtn" id="chooseStopwatch">Stopwatch</button></div>
+  <div class="drawer" id="timerDrawer"><div class="timerdisplay" id="timerDisplay">05:00</div><div class="timerinputs"><input id="mins" type="number" min="0" value="5"><span>m</span><input id="secs" type="number" min="0" max="59" value="0"><span>s</span></div><div class="actions"><button id="timerStart">Start</button><button class="secondary" id="timerReset">Reset</button></div></div>
+  <div class="drawer" id="stopwatchDrawer"><div class="timerdisplay" id="swDisplay">00:00</div><div class="actions"><button id="swStart">Start</button><button class="secondary" id="swReset">Reset</button></div></div>
+
+  <button class="tool brandTool" data-drawer="messageDrawer" style="--tool-bg:#ffe2cf;--tool-border:#ef8d72"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4.2-.9L20 7.3 16.7 4 4.9 15.8 4 20Z"/><path d="m14.5 6.2 3.3 3.3M4 20h16"/></svg></b><span>Quick Message</span></button>
+  <div class="drawer" id="messageDrawer"><textarea id="msgInput" placeholder="Type a memo for your class..."></textarea><div class="actions"><button id="msgSave">Show Memo</button><button class="secondary" id="msgClear">Clear</button></div></div>
+  <button class="tool brandTool" data-drawer="voiceDrawer" style="--tool-bg:#dcf6f5;--tool-border:#68c9c6"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9v6M9 6v12M13 3v18M17 7v10M21 10v4"/></svg></b><span>Voice Level</span></button>
+  <div class="drawer" id="voiceDrawer">
+   <div class="drawerLabel">Choose the classroom voice level</div>
+   <div class="voiceGrid">
+    <button class="voiceBtn" data-level="0 — Silent">0 · Silent</button>
+    <button class="voiceBtn" data-level="1 — Whisper">1 · Whisper</button>
+    <button class="voiceBtn" data-level="2 — Partner">2 · Partner</button>
+    <button class="voiceBtn" data-level="3 — Table Talk">3 · Table Talk</button>
+   </div>
+   <div class="actions"><button class="secondary" id="voiceClear">Clear</button></div>
+  </div>
+  <button class="tool brandTool" data-drawer="suppliesDrawer" style="--tool-bg:#e3f0f8;--tool-border:#69a9cf"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 5v15M12 9h5M12 13h5M12 17h3"/></svg></b><span>Supplies Needed</span></button>
+  <div class="drawer" id="suppliesDrawer">
+   <div class="drawerLabel">Tap everything students need</div>
+   <div class="supplyGrid" id="supplyGrid"></div>
+   <div class="actions"><button class="secondary" id="suppliesClear">Clear</button></div>
+  </div>
+  <button class="tool brandTool" data-drawer="namePickerDrawer" style="--tool-bg:#fde3ec;--tool-border:#d9779d"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.4 7 .9-5.1 5 .9 7-5.9-3.3-5.9 3.3.9-7-5.1-5 7-.9L12 2Z"/></svg></b><span>Random Name</span></button>
+  <div class="drawer" id="namePickerDrawer">
+   <div class="drawerLabel">Uses the class selected at the top of Home Base</div>
+   <label style="display:flex;gap:7px;align-items:center;font-size:12px;margin:6px 0 9px"><input type="checkbox" id="pickerNoRepeats" checked> No repeats until everyone is picked</label>
+   <div class="actions"><button id="pickNameBtn">Pick a Name</button><button class="secondary" id="resetPickerBtn">Reset</button></div>
+   <div class="hint" id="pickerRemaining" style="margin-top:7px"></div>
+  </div>
+  <button class="tool brandTool" data-drawer="groupsDrawer" style="--tool-bg:#e4f4d9;--tool-border:#92c978"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5.5 20v-2.5a6.5 6.5 0 0 1 13 0V20H5.5Z"/><path d="M4.5 9.5a2.5 2.5 0 1 1 2-4.6M3 19H1.5v-2a5 5 0 0 1 3.5-4.8M19.5 9.5a2.5 2.5 0 1 0-2-4.6M21 19h1.5v-2a5 5 0 0 0-3.5-4.8"/></svg></b><span>Groups &amp; Partners</span></button>
+  <div class="drawer" id="groupsDrawer">
+   <div class="drawerLabel">Uses the class selected at the top of Home Base</div>
+   <select class="toolSelect" id="groupMode">
+    <option value="size">Students per group</option>
+    <option value="count">Number of groups</option>
+   </select>
+   <label class="drawerLabel" id="groupNumberLabel">Students per group (2–18)</label>
+   <select class="toolSelect" id="groupNumber"></select>
+   <div class="actions"><button id="makeGroupsBtn">Make Groups</button><button class="secondary" id="shuffleGroupsBtn">Shuffle Again</button></div>
+  </div>
+  <button class="tool brandTool" data-drawer="videosDrawer" style="--tool-bg:#e3f0f8;--tool-border:#69a9cf"><b><svg class="toolLineIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18l-7-6-7 6V3Z"/></svg></b><span>Bookmarks</span></button>
+  <div class="drawer" id="videosDrawer">
+   <div class="drawerLabel">Quick links to websites you use throughout the day</div>
+   <div id="savedVideoList" class="savedVideoList"></div>
+   <button id="addVideoBtn" class="videoAddBtn" type="button" title="Add saved video">＋ Add Bookmark</button>
+   <div id="videoEditor" class="videoEditor" hidden>
+    <div class="drawerLabel" id="videoFormHeading">Add Bookmark</div>
+    <input id="videoTitleInput" placeholder="Bookmark title" aria-label="Bookmark title" class="videoInput">
+    <input id="videoUrlInput" placeholder="Paste website URL" aria-label="Website URL" class="videoInput">
+    <div class="drawerLabel">Tab color</div><div id="videoColorChoices" class="videoColorChoices"></div>
+    <div id="videoFormError" class="videoFormError" role="alert"></div>
+    <div class="actions"><button id="saveVideoBtn" type="button">Save Bookmark</button><button class="secondary" id="cancelVideoEditBtn" type="button">Cancel</button></div>
+   </div>
+  </div>
+  <div class="spacer"></div>
+  <button class="tool" id="collapse"><b>‹</b>Hide tools</button>
+ <div class="sidebarFooter"><a href="https://www.teacherspayteachers.com/store/organize-and-educate" target="_blank" rel="noopener noreferrer">Organize and Educate <span aria-hidden="true">↗</span></a></div>
+</aside>
+ <main class="main">
+  <button id="showTools" type="button" aria-label="Show toolbar" title="Show tools">› <span>Show tools</span></button>
+  <header class="topbar">
+   <button class="topbtn" id="add" title="Add a presentation">＋ Presentation</button><button class="topbtn" id="manage" title="Manage presentations and presentation folders">Manage</button>
+   <div class="presentationNav"><div class="tabs" id="tabs"></div></div><div id="folderFlyout" class="folderFlyout" hidden></div>
+   <div class="classMenuWrap"><button type="button" class="topbtn classMenuButton" id="homeClassButton" aria-haspopup="true" aria-expanded="false">Classes ▾</button><div id="homeClassMenu" class="classMenu" hidden></div></div><button type="button" class="classEditShortcut" id="manageClassesBtn" title="Manage classes, folders and student lists" aria-label="Manage classes, folders and student lists">✎</button><button class="smallbtn" id="refreshPresentation" type="button" title="Reload this presentation to see recent edits">↻ Refresh</button>
+   <button class="topbtn" id="fullscreen" type="button" title="Full screen Home Base (keeps the toolbar and presentation tabs visible)">⛶ Full Screen</button>
+  </header>
+  <section class="stage">
+   <div class="framewrap" id="framewrap">
+    <div class="empty" id="empty"><h1>Your classroom, one home base.</h1><p>Add a Canva or Google Slides presentation to begin.</p><button class="emptyAddPresentation" id="emptyAddPresentation" type="button">＋ Presentation</button></div>
+    <div id="viewerHost" class="viewerHost" hidden></div>
+   </div>
+   <div class="memoBanner" id="memoBanner"><span id="memoText"></span><button class="memoClose" id="memoClose">×</button></div>
+   <div class="clockOverlay" id="clockOverlay"><button class="overlayClose" id="clockOverlayClose" title="Hide clock">×</button><div class="clockLabel">Time</div><div class="clockValue" id="clockSlideDisplay">--:--</div><div class="clockSlideDate" id="clockSlideDate" aria-label="Current day and date"></div><div class="clockResize" id="clockResize" title="Drag to resize"></div></div>
+   <div class="timerOverlay" id="timerOverlay"><button class="overlayClose" id="timerOverlayClose" title="Hide timer">×</button><div class="timerLabel">Timer</div><div class="timerValue" id="timerSlideDisplay">05:00</div><div class="timerTrack"><div class="timerFill" id="timerFill"></div></div><div class="timerPlaybackRow"><button id="timerOverlayPause" type="button">Pause</button><button id="timerOverlayReset" type="button" title="Return to starting time">Reset</button></div><div class="timerQuickControls"><button id="timerMinus10" title="Subtract 10 seconds">−10 sec</button><button id="timerPlus10" title="Add 10 seconds">+10 sec</button><button id="timerPlus60" title="Add 1 minute">+1 min</button><button id="timerPlus300" title="Add 5 minutes">+5 min</button></div><div class="timerResize" id="timerResize" title="Drag to resize"></div></div>
+   <div class="stopwatchOverlay" id="stopwatchOverlay"><button class="overlayClose" id="stopwatchOverlayClose" title="Hide stopwatch">×</button><div class="swLabel">Stopwatch</div><div class="swValue" id="swSlideDisplay">00:00</div><div class="timerQuickControls"><button id="swOverlayStop">Stop</button><button id="swOverlayReset">Reset</button></div><div class="swResize" id="swResize" title="Drag to resize"></div></div>
+   <div class="pickerResultOverlay" id="pickerResultOverlay"><button class="overlayClose toolOverlayClose" id="pickerResultClose" title="Hide name">×</button><div class="pickerResultLabel">Random Name</div><div class="pickerResultName" id="pickerResultName">—</div><div class="resultQuickControls"><button id="pickerOverlayShuffle" type="button">↻ Shuffle</button></div><div class="resultResize" id="pickerResultResize" title="Drag to resize"></div></div>
+   <div class="groupsResultOverlay" id="groupsResultOverlay"><button class="overlayClose toolOverlayClose" id="groupsResultClose" title="Hide groups">×</button><div class="groupsTitle" id="groupsTitle">Groups</div><div class="groupsGrid" id="groupsGrid"></div><div class="resultQuickControls"><button id="groupsOverlayShuffle" type="button">↻ Shuffle</button></div><div class="resultResize" id="groupsResultResize" title="Drag to resize"></div></div>
+  </div>
+   <div class="statusStrip" id="statusStrip"></div>
+  </section>
+ </main>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox">
+ <div class="panelhead"><h2>Add a Presentation</h2><button class="close" id="modalClose">×</button></div>
+ <div class="field"><label>Presentation name</label><input id="pname" placeholder="Morning Meeting"></div>
+ <div class="field"><label>Canva or Google Slides link</label><input id="purl" placeholder="Paste the share/view link here"></div>
+ <div class="hint"><b>Google Slides:</b> paste the normal share link as anyone with the link can view; Home Base converts it automatically.<br><br><b>Canva:</b> a Public View link is not the same as an embed. In Canva choose Share → More → Embed, then paste the embed URL code here. Embedded Canva designs stay connected to the original, so later Canva edits can appear.</div>
+ <div class="field"><label for="presentationFolder">Folder (optional)</label><select id="presentationFolder" class="folderSelect"></select></div>
+ <div class="field"><label>Presentation tab color</label><div class="colorEditWrap"><div class="currentColorSwatch" id="newPresentationColorPreview"></div><button class="colorEditBtn" id="newPresentationColorEdit" type="button" title="Choose presentation color">✎</button><div class="colorPalettePopover" id="newPresentationColorPalette"></div></div></div>
+ <div class="error" id="urlError"></div>
+ <div class="actions" style="justify-content:flex-end"><button class="secondary" id="cancel">Cancel</button><button id="save">Save Presentation</button></div>
+</div></div>
+
+
+<div class="modal" id="manageModal"><div class="modalbox">
+ <div class="panelhead"><h2>Manage Presentations</h2><button class="close" id="manageClose">×</button></div>
+ <div class="hint" style="margin-bottom:12px">Your saved presentations live in this browser. Delete anything you no longer want in Home Base. The presentation itself is not deleted from Google Slides or Canva.</div>
+ <div class="folderManageHeading"><b>Folders</b><button class="topbtn" type="button" id="addFolderManage">＋ New Folder</button></div><div id="manageFolders"></div><div class="folderManageHeading"><b>Presentations</b></div><div id="manageList"></div>
+</div></div>
+
+<div class="modal" id="folderModal"><div class="modalbox"><div class="panelhead"><h2 id="folderModalTitle">New Folder</h2><button class="close" id="folderModalClose">×</button></div><div class="field"><label for="folderName">Folder name</label><input id="folderName" maxlength="65" placeholder="Reading"></div><div class="field"><label>Folder color</label><div class="colorEditWrap"><div class="currentColorSwatch" id="folderColorPreview"></div><button class="colorEditBtn" id="folderColorEdit" type="button">✎</button><div class="colorPalettePopover" id="folderColorPalette"></div></div></div><div class="error" id="folderError"></div><div class="actions" style="justify-content:flex-end"><button class="secondary" id="folderCancel">Cancel</button><button id="folderSave">Save Folder</button></div></div></div>
+
+<div class="modal" id="folderDeleteModal"><div class="modalbox" style="max-width:520px"><div class="panelhead"><h2>Delete Folder</h2><button class="close" id="folderDeleteClose" type="button">×</button></div><p id="folderDeleteIntro" style="line-height:1.5;margin:12px 0 16px"></p><div id="folderDeleteChoices" style="display:grid;gap:10px"><label class="folderDeleteChoice"><input type="radio" name="folderDeleteMode" value="keep" checked><span><strong>Keep presentations</strong><small>Move presentations to the main tab bar without deleting them.</small></span></label><label class="folderDeleteChoice"><input type="radio" name="folderDeleteMode" value="delete"><span><strong>Delete folder and presentations</strong><small>Remove the folder and all presentations inside it from Home Base.</small></span></label></div><p class="hint" style="margin-top:14px">This only removes saved links from Home Base. Your original Canva or Google Slides files are not deleted.</p><div class="actions" style="justify-content:flex-end"><button class="secondary" id="folderDeleteCancel" type="button">Cancel</button><button id="folderDeleteConfirm" type="button">Delete Folder</button></div></div></div>
+<div class="modal" id="classesModal"><div class="modalbox classesModalBox"><div class="panelhead"><h2>Manage Classes &amp; Student Lists</h2><button class="close" id="classesModalClose" type="button" aria-label="Close class manager">×</button></div> <div class="settingsSection" id="classesSettingsSection"><h3>Classes &amp; Student Lists</h3><div class="hint">Create and name your class lists. The class selected at the top of Home Base is used by Random Name and Groups &amp; Partners.</div><div class="classFolderManager"><div class="folderManageHeading"><b>Class Folders</b><button type="button" class="topbtn" id="addClassFolderBtn">＋ New Folder</button></div><div class="hint">Folders are optional. Organize class lists into color-coded folders, or leave them unfiled.</div><div id="classFolderList"></div></div><div class="hint" style="margin-top:8px">Drag class lists to reorder them or drop them onto folders. Drag folder headings to rearrange folders. Click a class to edit it.</div><div class="classTabs" id="classTabs"><button class="classTab" id="addClassBtn" type="button">+ Add Class</button></div><div class="classEditor"><label class="drawerLabel">Class Name</label><input class="classNameInput" id="classNameInput" maxlength="50" placeholder="Example: Period 2 Math"><div class="hint" id="classListCount">0 students</div><label class="drawerLabel" for="classFolderSelect">Folder (optional)</label><select class="classNameInput" id="classFolderSelect"></select><label class="drawerLabel">Student List</label><textarea class="classListBox" id="classListInput" placeholder="Ava&#10;Ben&#10;Chloe (Mia)&#10;Daniel"></textarea><div class="hint"><b>Optional grouping note:</b> Keep students apart with parentheses: <b>Haylee (Sadie)</b>. For multiple students: <b>Haylee (Sadie, Casey)</b>.</div><div class="classSettingsActions">
+    <button class="primary" id="saveClassBtn" type="button">Save Changes</button>
+    <button class="secondary" id="cancelClassBtn" type="button">Cancel</button>
+   </div>
+   <div class="classSettingsActions" id="classDeleteRow" style="margin-top:14px">
+    <button class="secondary" id="deleteClassBtn" type="button">Delete Class</button>
+   </div></div></div>
+<div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="primary" id="classesModalDone" type="button">Done</button></div></div></div>
+<div class="modal" id="classFolderModal"><div class="modalbox" style="max-width:460px"><div class="panelhead"><h2 id="classFolderModalTitle">New Class Folder</h2><button class="close" type="button" id="classFolderClose">×</button></div><div class="field"><label for="classFolderName">Folder name</label><input id="classFolderName" maxlength="65" placeholder="Example: Intervention"></div><div class="field"><label>Folder color</label><div class="colorEditWrap"><div class="currentColorSwatch" id="classFolderColorPreview"></div><button class="colorEditBtn" id="classFolderColorEdit" type="button" title="Choose folder color">✎</button><div class="colorPalettePopover" id="classFolderColorPalette"></div></div></div><div class="error" id="classFolderError"></div><div class="actions" style="justify-content:flex-end"><button type="button" class="secondary" id="classFolderCancel">Cancel</button><button type="button" id="classFolderSave">Save Folder</button></div></div></div>
+<div class="modal" id="classFolderDeleteModal"><div class="modalbox" style="max-width:510px"><div class="panelhead"><h2>Delete Class Folder</h2><button class="close" type="button" id="classFolderDeleteClose">×</button></div><p id="classFolderDeleteIntro"></p><div class="classFolderDeleteOptions"><label><input type="radio" name="classFolderDeleteMode" value="keep" checked> <span><strong>Keep class lists</strong><small>Move class lists out of this folder.</small></span></label><label><input type="radio" name="classFolderDeleteMode" value="delete"> <span><strong>Delete folder and class lists</strong><small>Remove these class lists and their student names from Home Base.</small></span></label></div><div class="actions" style="justify-content:flex-end"><button class="secondary" type="button" id="classFolderDeleteCancel">Cancel</button><button type="button" id="classFolderDeleteConfirm">Delete Folder</button></div></div></div>
+<div class="modal" id="settingsModal"><div class="modalbox">
+ <div class="panelhead"><h2>Settings</h2><button class="close" id="settingsClose">×</button></div>
+ <div class="settingsSection">
+  <h3>Timer</h3>
+  <div class="hint">Choose what students see on the presentation.</div>
+  <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+   <label style="display:flex;gap:6px;align-items:center"><input type="radio" name="timerMode" value="visual"> Visual + countdown</label>
+   <label style="display:flex;gap:6px;align-items:center"><input type="radio" name="timerMode" value="countdown"> Countdown only</label>
+  </div>
+  <div style="margin-top:10px"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="timerChime" checked> Play a chime when time is up</label></div>
+ </div>
+ <div class="settingsSection">
+  <h3>Memo Bar</h3>
+  <div class="hint">Choose from 12 preset colors for the student-facing memo bar.</div>
+  <div class="colorEditWrap"><div class="currentColorSwatch" id="memoColorPreview"></div><button class="colorEditBtn" id="memoColorEdit" type="button" title="Edit memo bar color">✎</button><div class="colorPalettePopover" id="memoColorPalette"></div></div>
+ </div>
+ <div class="settingsSection">
+  <h3>Voice Level &amp; Supplies Bar</h3>
+  <div class="hint">Choose from 12 preset colors for the student-facing bar along the bottom of the presentation.</div>
+  <div class="colorEditWrap"><div class="currentColorSwatch" id="statusBarColorPreview"></div><button class="colorEditBtn" id="statusBarColorEdit" type="button" title="Edit bottom bar color">✎</button><div class="colorPalettePopover" id="statusBarColorPalette"></div></div>
+  <div class="hint" style="margin-top:12px">Choose how large the voice level and supply visuals appear while presenting.</div>
+  <div class="segmented">
+   <label><input type="radio" name="statusBarSize" value="small"> Small</label>
+   <label><input type="radio" name="statusBarSize" value="medium"> Medium</label>
+   <label><input type="radio" name="statusBarSize" value="large"> Large</label>
+  </div>
+ </div>
+ <div class="settingsSection">
+  <h3>Voice Levels</h3>
+  <div class="hint">Edit the number/symbol and wording your classroom uses.</div>
+  <div id="voiceSettings"></div>
+  <div class="customAdd"><input id="voiceNumNew" placeholder="4"><input id="voiceWordNew" placeholder="Presentation"><button class="primary" id="addVoice">Add</button></div>
+ </div>
+ <div class="settingsSection">
+  <h3>Supplies</h3>
+  <div class="hint">Add custom supplies. Choose an emoji so students can identify it quickly.</div>
+  <div id="supplySettings"></div>
+  <div class="customAdd"><input id="supplyIconNew" placeholder="🎨" style="max-width:70px"><input id="supplyNameNew" placeholder="Markers"><button class="primary" id="addSupply">Add</button></div>
+ </div>
+ <div class="settingsSection">
+  <h3>Backup &amp; Restore</h3>
+  <div class="hint"><b>Optional:</b> Download a backup before replacing Home Base with an updated file if you want to carry your setup forward. Your saved presentation links, folders, tab names/colors/order, class lists, bookmarks, and Home Base settings can be restored into the new copy.</div>
+  <div class="backupActions"><button class="primary" id="backupDataBtn" type="button">Backup Data</button><button class="secondary" id="importDataBtn" type="button">Import Data</button><input id="importDataFile" type="file" accept=".json,application/json" hidden></div>
+  <div class="hint" id="backupStatus" style="margin-top:7px"></div>
+ </div>
+ <div class="actions" style="justify-content:flex-end"><button id="settingsDone">Done</button></div>
+</div></div>
+
+
+<button class="chromeReopen" id="chromeReopen" title="Show top tools">Tools &amp; Settings ▾</button>
+<div class="infoModal" id="tipsFaqModal">
+ <div class="infoCard">
+  <h2>Tips &amp; FAQs</h2>
+  <h3>Quick Start</h3>
+  <ul>
+   <li>Select <b>+ Presentation</b> to add a slideshow and give it a name. Google Slides share links can be pasted directly; for Canva, use the Canva embed code. Organize slideshows with optional folders using <b>Manage</b>.</li>
+   <li>Use the left toolbar for classroom tools. Minimize it when you want more room for your presentation.</li>
+   <li>Your presentations, folders, class lists, bookmarks, and custom settings are saved in this browser on this device. They do not automatically sync to another browser or device.</li>
+  </ul>
+  <h3>Presentation Tools</h3>
+  <p><b>Memo:</b> Save a quick message to display in the colored bar across the top of the presentation.</p>
+  <p><b>Voice Level:</b> Display the current classroom voice expectation in the bottom information bar so students know how loudly they should be speaking. Customize voice-level names, numbers, and colors in <b>Settings</b>.</p>
+  <p><b>Supplies Needed:</b> Show students which materials to have ready in the bottom information bar. Add or customize your classroom supplies in <b>Settings</b>.</p>
+  <p><b>Timer (Countdown &amp; Stopwatch):</b> Open Timer in the left toolbar and switch between <b>Countdown Timer</b> and <b>Stopwatch</b>. Both can appear in draggable, resizable pop-ups over your presentation. Use the × on a pop-up to close it.</p>
+  <ul style="margin:4px 0 12px 24px;padding-left:16px;list-style-type:disc;">
+    <li style="margin-bottom:6px;"><b>Countdown Timer:</b> Enter your starting time in the left toolbar, then start the countdown. In the pop-up, use Pause/Resume, adjust the remaining time with −10 sec, +10 sec, +1 min, or +5 min, or select Reset to stop the countdown and return to the <b>starting time entered in the left toolbar</b> (not zero). In Settings, choose Visual + Countdown or Countdown Only and turn the ending chime on or off.</li>
+    <li><b>Stopwatch:</b> Counts upward from 00:00. Start or stop it as needed; Reset stops the stopwatch and returns it to <b>00:00</b> without closing the pop-up.</li>
+  </ul>
+  <p><b>Clock:</b> Open Clock to quickly peek at the current time in the toolbar. Choose Display on Presentation only when you want students to see it; the pop-out shows the time and date and can be dragged, resized, or hidden with ×.</p>
+  <h3>Saved Classes &amp; Student Lists</h3>
+  <p>Manage your saved classes in one place, then choose the active class from the top bar. The selected class is used by both Random Name and Groups &amp; Partners.</p>
+  <ul style="margin:4px 0 12px 24px;padding-left:16px;list-style-type:disc;">
+    <li style="margin-bottom:6px;"><b>Select a Class:</b> Click the current class name in the top bar. If you have class folders, hover over or click a folder to expand its lists, then select a class.</li>
+    <li style="margin-bottom:6px;"><b>Manage Class Lists:</b> Click the pencil next to the class selector to open <b>Manage Classes &amp; Student Lists</b>. Add or edit classes and student names. There is no eight-class limit.</li>
+    <li style="margin-bottom:6px;"><b>Class Folders:</b> Create optional color-coded folders, assign classes to folders or leave them unfiled, and drag class lists or folder headings to reorder them or move classes between folders. Folders can be one level deep only.</li>
+    <li style="margin-bottom:6px;"><b>Delete a Class Folder:</b> Choose whether to keep its class lists (moving them out of the folder) or delete the folder and its class lists. Deleting class lists also removes their saved student names from Home Base, so consider making a backup first.</li>
+    <li style="margin-bottom:6px;"><b>Random Name:</b> Choose a student at random from the selected class. Turn on the option to prevent repeats until everyone has been chosen.</li>
+    <li style="margin-bottom:6px;"><b>Groups &amp; Partners:</b> Make balanced groups from the selected class by choosing students per group or the number of groups. Select <b>Shuffle Again</b> for a new mix.</li>
+    <li><b>Keep Certain Students Apart:</b> Optional. In a class list, add another student's name in parentheses, such as <b>Haylee (Sadie)</b>. Separate multiple names with commas. Home Base will try to place those students in different groups and warn you if it cannot meet every separation note.</li>
+  </ul>
+  <h3>Saved Presentations &amp; Folders</h3>
+  <ul style="margin:4px 0 12px 24px;padding-left:16px;list-style-type:disc;">
+    <li style="margin-bottom:6px;"><b>Add &amp; Manage:</b> Select <b>+ Presentation</b> to add a slideshow, or <b>Manage</b> to organize saved presentations and folders.</li>
+    <li style="margin-bottom:6px;"><b>Presentation Folders:</b> Folders are optional and have their own colors. Standalone presentations and folders share the top tab bar. Hover over or click a folder to reveal its presentations in a floating menu.</li>
+    <li style="margin-bottom:6px;"><b>Reorder:</b> Drag tabs to change their order or move presentations into folders.</li>
+    <li><b>Delete a Folder:</b> Choose whether to keep its presentations as standalone tabs or remove those saved presentation links from Home Base. The original Canva and Google Slides files are not deleted.</li>
+  </ul>
+  <p><b>Bookmarks:</b> Pre-save links to videos, frequently used websites, music, interactive activities, and other pages you display to your class throughout the day. Select <b>+ Add Bookmark</b>, paste a website link, and choose a title and color. Click a saved bookmark to open it in a new browser tab without changing your Home Base presentation. Use the pencil to edit, the trash can to delete, or drag bookmarks to reorder them. Your bookmarks stay saved in this browser.</p>
+  <h3>Can I customize the supplies and voice levels?</h3>
+  <p>Yes. Open Settings to edit voice-level numbers, wording and colors or add custom supplies for your classroom.</p>
+  <h3>Will my presentation update when I edit Canva or Google Slides?</h3>
+  <p>Home Base displays the linked Canva or Google Slides presentation. After editing the original, click <b>↻ Refresh</b> above the presentation to load the latest version. Refreshing may return that slideshow to slide 1.</p>
+  <h3>Where is my information saved?</h3>
+  <p><b>Backup &amp; Restore is optional.</b> Home Base saves presentation links, presentation and class folders, class lists, bookmarks, and preferences in the current browser on this device; these do <b>not</b> automatically sync between devices. Before switching browsers or devices, or updating Home Base, select <b>Backup Data</b> in Settings and save the downloaded JSON file. Use <b>Import Data</b> in the other copy to restore the saved setup. Your original Canva or Google Slides files are not included in the backup.</p>
+  <h3>Why won't an embedded presentation load in a file preview?</h3>
+  <p>Open the HTML file in a full web browser such as Chrome, Edge or Safari rather than a computer's file preview window.</p>
+  <div class="infoCloseRow"></div>
+
+<div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="headerBtn" id="tipsFaqClose">Close</button></div>
+
+ </div>
+</div>
+<script>// Separate storage namespace for the clean teacher distribution copy.
+// Backup files retain the original oae-* keys for compatibility with test/older copies.
+const homeBaseStorage = (() => {
+ const prefix='oae-homebase-teacher-blank-v76::';
+ const nativeStorage=window.localStorage;
+ const keys=()=>Object.keys(nativeStorage).filter(k=>k.startsWith(prefix)).map(k=>k.slice(prefix.length));
+ return {
+  getItem(k){return nativeStorage.getItem(prefix+k)},
+  setItem(k,v){nativeStorage.setItem(prefix+k,String(v))},
+  removeItem(k){nativeStorage.removeItem(prefix+k)},
+  clear(){keys().forEach(k=>nativeStorage.removeItem(prefix+k))},
+  key(i){return keys()[i]??null},
+  get length(){return keys().length}
+ };
+})();
+
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const viewerHost=$('#viewerHost'), empty=$('#empty'), tabs=$('#tabs');
+let presentations=JSON.parse(homeBaseStorage.getItem('oae-homebase-new-presentations')||'[]');
+let active=+(homeBaseStorage.getItem('oae-homebase-new-active')||0);
+let newPresentationColor='#dcf6f5';
+const presentationFallbackColors=['#fde3ec','#ffe2cf','#fff1c9','#dcf6f5','#e3f0f8','#eee3fb'];
+let presentationIdsChanged=false;
+presentations.forEach((p,i)=>{
+ if(!p.color)p.color=presentationFallbackColors[i%presentationFallbackColors.length];
+ if(!p.frameId){p.frameId='p_'+Date.now().toString(36)+'_'+i+'_'+Math.random().toString(36).slice(2,8);presentationIdsChanged=true;}
+});
+if(presentationIdsChanged)homeBaseStorage.setItem('oae-homebase-new-presentations',JSON.stringify(presentations));
+
+function decodeHtmlEntities(str){
+ const t=document.createElement('textarea');
+ t.innerHTML=str;
+ return t.value;
+}
+function embedUrl(raw){
+ raw=(raw||'').trim();
+
+ // Accept Canva's entire HTML embed block, even when it spans many lines.
+ if(/<iframe[\s\S]*?<\/iframe>/i.test(raw)){
+   const iframe=raw.match(/<iframe[\s\S]*?<\/iframe>/i)[0];
+   const srcMatch=iframe.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+   if(srcMatch) raw=decodeHtmlEntities(srcMatch[1]);
+ }
+
+ raw=decodeHtmlEntities(raw).trim();
+
+ try{
+  const u=new URL(raw);
+
+  // Normal Google Slides share link -> live embedded presentation.
+  if(u.hostname.includes('docs.google.com') && u.pathname.includes('/presentation/d/')){
+    const m=u.pathname.match(/\/presentation\/d\/([^/]+)/);
+    if(m) return 'https://docs.google.com/presentation/d/'+m[1]+'/embed?start=false&loop=false&delayms=3000';
+  }
+
+  // Canva Smart/Public View links need the embed query flag.
+  if(u.hostname.includes('canva.com') && u.pathname.includes('/design/')){
+    u.searchParams.set('embed','');
+    // URLSearchParams serializes blank params as embed=; Canva accepts this form.
+    return u.toString();
+  }
+
+  return raw;
+ }catch(e){return null}
+}
+// V65: folder IDs and presentation IDs are stable, preserving iframe instances while reorganizing.
+const FOLDERS_KEY='oae-homebase-presentation-folders';
+const ORDER_KEY='oae-homebase-presentation-top-order';
+let folders=[];
+try{folders=JSON.parse(homeBaseStorage.getItem(FOLDERS_KEY)||'[]');if(!Array.isArray(folders))folders=[]}catch(e){folders=[]}
+let topOrder=[];
+try{topOrder=JSON.parse(homeBaseStorage.getItem(ORDER_KEY)||'[]');if(!Array.isArray(topOrder))topOrder=[]}catch(e){topOrder=[]}
+let expandedFolder=null; // intentionally collapsed on each new opening
+let draggingPresentation=null;
+let folderEditingId=null;
+let folderDraftColor='#dcf6f5';
+function uid(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9)}
+function normalizePresentationFolders(){
+ const folderIds=new Set(folders.map(f=>f.id));
+ let changed=false;
+ presentations.forEach(p=>{if(!p.folderId||!folderIds.has(p.folderId)){if(p.folderId)changed=true;p.folderId=null;}});
+ const valid=new Set([...folders.map(f=>'f:'+f.id),...presentations.filter(p=>!p.folderId).map(p=>'p:'+p.frameId)]);
+ const next=[...new Set(topOrder.filter(id=>valid.has(id)).concat([...valid]))];
+ if(JSON.stringify(next)!==JSON.stringify(topOrder)){topOrder=next;changed=true}
+ if(changed)savePresentationOrganization();
+}
+function savePresentationOrganization(){
+ homeBaseStorage.setItem(FOLDERS_KEY,JSON.stringify(folders));
+ homeBaseStorage.setItem(ORDER_KEY,JSON.stringify(topOrder));
+ homeBaseStorage.setItem('oae-homebase-new-presentations',JSON.stringify(presentations));
+ homeBaseStorage.setItem('oae-homebase-new-active',active);
+}
+function refreshFolderOptions(select,selected){
+ if(!select)return;
+ select.innerHTML='';
+ const option=document.createElement('option');option.value='';option.textContent='No folder — main tab bar';select.appendChild(option);
+ folders.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.name;select.appendChild(o)});
+ const create=document.createElement('option');create.value='__create__';create.textContent='＋ Create new folder…';select.appendChild(create);
+ select.value=selected||'';
+ select.onchange=()=>{if(select.value==='__create__'){const previous=selected||'';openFolderModal(null,id=>{refreshFolderOptions(select,id)});select.value=previous;}};
+}
+function movePresentationToFolder(frameId,folderId,atIndex){
+ const p=presentations.find(x=>x.frameId===frameId);
+ if(!p)return;
+ if(folderId && !folders.some(f=>f.id===folderId))return;
+ const old=p.folderId||null;
+ p.folderId=folderId||null;
+ if(old!==p.folderId){topOrder=topOrder.filter(x=>x!=='p:'+frameId);if(!p.folderId)topOrder.push('p:'+frameId)}
+ if(p.folderId){
+  const peers=presentations.filter(x=>x.folderId===p.folderId&&x!==p);
+  const index=Number.isInteger(atIndex)?Math.max(0,Math.min(atIndex,peers.length)):peers.length;
+  const desired=peers.slice();desired.splice(index,0,p);
+  const slots=presentations.map((x,i)=>x.folderId===p.folderId||x===p?i:-1).filter(i=>i>=0);
+  // Keep all non-target presentations stable; order inside the folder is the array order.
+  const others=presentations.filter(x=>x.folderId!==p.folderId&&x!==p);
+  presentations=[...others,...desired];
+ }
+ normalizePresentationFolders();savePresentationOrganization();renderTabs();renderManage();
+}
+function reorderTop(source,target,before){
+ const from=topOrder.indexOf(source),to=topOrder.indexOf(target);
+ if(from<0||to<0||source===target)return;
+ topOrder.splice(from,1);
+ let idx=topOrder.indexOf(target)+(before?0:1);
+ topOrder.splice(idx,0,source);
+ savePresentationOrganization();renderTabs();
+}
+function renderTabs(){
+ normalizePresentationFolders();
+ const root=$('#tabs'),children=$('#folderFlyout');root.innerHTML='';children.innerHTML='';children.hidden=true;
+ const folderById=new Map(folders.map(f=>[f.id,f]));
+ const pById=new Map(presentations.map(p=>[p.frameId,p]));
+ function makePresentationTab(p,insideFolder){
+  const i=presentations.indexOf(p),b=document.createElement('button');
+  b.className='tab'+(i===active?' active':'');b.textContent=p.name;
+  b.style.background=p.color||'#fff';b.style.borderColor=p.color||'var(--line)';b.draggable=true;
+  b.onclick=()=>{active=i;homeBaseStorage.setItem('oae-homebase-new-active',active);expandedFolder=null;renderTabs();loadActive()};
+  if(!insideFolder)b.onmouseenter=()=>closeFolderFlyout();
+  b.ondragstart=e=>{draggingPresentation={type:'p',id:p.frameId};b.classList.add('dragging');e.dataTransfer.setData('text/plain','p:'+p.frameId);e.dataTransfer.effectAllowed='move'};
+  b.ondragend=()=>{draggingPresentation=null;document.querySelectorAll('.dragTarget,.dragBefore,.dragAfter,.dragging,.folderDropZone').forEach(x=>x.classList.remove('dragTarget','dragBefore','dragAfter','dragging','folderDropZone'))};
+  b.ondragover=e=>{e.preventDefault();e.stopPropagation();const r=b.getBoundingClientRect();b.classList.toggle('dragBefore',e.clientX<r.left+r.width/2);b.classList.toggle('dragAfter',e.clientX>=r.left+r.width/2)};
+  b.ondragleave=()=>b.classList.remove('dragBefore','dragAfter');
+  b.ondrop=e=>{
+   e.preventDefault();e.stopPropagation();b.classList.remove('dragBefore','dragAfter');
+   const raw=e.dataTransfer.getData('text/plain'),source=raw.slice(2);
+   const before=e.clientX<b.getBoundingClientRect().left+b.offsetWidth/2;
+   if(raw.startsWith('f:')&&!insideFolder){reorderTop(raw,'p:'+p.frameId,before);return}
+   if(!raw.startsWith('p:')||source===p.frameId)return;
+   if(insideFolder){
+    const dragged=pById.get(source);if(!dragged)return;
+    const peers=presentations.filter(x=>x.folderId===p.folderId&&x.frameId!==source);
+    let idx=peers.indexOf(p)+(before?0:1);
+    movePresentationToFolder(source,p.folderId,idx);
+   }else{
+    const dragged=pById.get(source);if(!dragged)return;
+    if(dragged.folderId)movePresentationToFolder(source,null);
+    reorderTop('p:'+source,'p:'+p.frameId,before);
+   }
+  };
+  return b;
+ }
+ topOrder.forEach(item=>{
+  if(item.startsWith('f:')){
+   const f=folderById.get(item.slice(2));if(!f)return;
+   const b=document.createElement('button');b.className='tab folderTab'+(expandedFolder===f.id?' open':'');
+   b.style.background=f.color||'#dcf6f5';b.style.borderColor=f.color||'#dcf6f5';
+   const glyph=document.createElement('span');glyph.className='folderGlyph';glyph.textContent=expandedFolder===f.id?'▾':'▸';
+   const label=document.createElement('span');label.textContent='📁 '+f.name;b.append(glyph,label);
+   b.title='Open folder: '+f.name;b.dataset.folderId=f.id;b.draggable=true;
+   b.onclick=e=>{e.stopPropagation();expandedFolder=expandedFolder===f.id?null:f.id;renderTabs();if(expandedFolder)positionFolderFlyout(f.id)};
+   b.onmouseenter=()=>{clearTimeout(folderCloseTimer);if(draggingPresentation||expandedFolder===f.id)return;expandedFolder=f.id;renderTabs();positionFolderFlyout(f.id)};
+   b.ondragstart=e=>{e.dataTransfer.setData('text/plain','f:'+f.id);e.dataTransfer.effectAllowed='move';b.classList.add('dragging')};
+   b.ondragend=()=>{b.classList.remove('dragging','dragTarget','dragBefore','dragAfter')};
+   b.ondragover=e=>{e.preventDefault();e.stopPropagation();const raw=e.dataTransfer.types.includes('text/plain');if(!raw)return;b.classList.add('dragTarget')};
+   b.ondragleave=()=>b.classList.remove('dragTarget');
+   b.ondrop=e=>{e.preventDefault();e.stopPropagation();b.classList.remove('dragTarget');const raw=e.dataTransfer.getData('text/plain');if(raw.startsWith('p:')){movePresentationToFolder(raw.slice(2),f.id);expandedFolder=f.id;renderTabs();positionFolderFlyout(f.id)}else if(raw.startsWith('f:')){reorderTop(raw,item,e.clientX<b.getBoundingClientRect().left+b.offsetWidth/2)}};
+   root.appendChild(b);
+  }else if(item.startsWith('p:')){
+   const p=pById.get(item.slice(2));if(p&&!p.folderId)root.appendChild(makePresentationTab(p,false));
+  }
+ });
+ if(expandedFolder&&folderById.has(expandedFolder)){
+  children.hidden=false;
+  const peers=presentations.filter(p=>p.folderId===expandedFolder);
+  if(!peers.length){const hint=document.createElement('span');hint.className='folderHint';hint.textContent='Drag presentations here, or assign them in Manage.';children.appendChild(hint)}
+  peers.forEach(p=>children.appendChild(makePresentationTab(p,true)));
+  children.ondragover=e=>{if(e.dataTransfer.types.includes('text/plain')){e.preventDefault();children.classList.add('folderDropZone')}};
+  children.ondragleave=e=>{if(!children.contains(e.relatedTarget))children.classList.remove('folderDropZone')};
+  children.ondrop=e=>{e.preventDefault();children.classList.remove('folderDropZone');const raw=e.dataTransfer.getData('text/plain');if(raw.startsWith('p:'))movePresentationToFolder(raw.slice(2),expandedFolder)};
+ }else{children.hidden=true;children.ondrop=null;children.ondragover=null}
+ if(expandedFolder)positionFolderFlyout(expandedFolder);
+ root.ondragover=e=>{if(e.dataTransfer.types.includes('text/plain'))e.preventDefault()};
+ root.ondrop=e=>{if(e.target!==root)return;e.preventDefault();const raw=e.dataTransfer.getData('text/plain');if(raw.startsWith('p:'))movePresentationToFolder(raw.slice(2),null)};
+}
+function positionFolderFlyout(id){
+ const fly=$('#folderFlyout');if(fly.hidden)return;
+ const tab=Array.from($('#tabs').querySelectorAll('.folderTab')).find(b=>b.dataset.folderId===id);
+ if(!tab)return;
+ const r=tab.getBoundingClientRect();
+ // Fixed positioning keeps the menu visible outside the horizontally scrolling tab bar.
+ const width=Math.max(175,fly.offsetWidth||175);
+ fly.style.left=Math.max(6,Math.min(r.left,window.innerWidth-width-8))+'px';
+ fly.style.top=Math.min(r.bottom+5,window.innerHeight-Math.min(fly.offsetHeight,window.innerHeight*.65)-8)+'px';
+}
+let folderCloseTimer=null;
+function closeFolderFlyout(){expandedFolder=null;$('#folderFlyout').hidden=true;$('#tabs').querySelectorAll('.folderTab').forEach(b=>b.classList.remove('open'))}
+$('#folderFlyout').addEventListener('mouseenter',()=>clearTimeout(folderCloseTimer));
+$('#folderFlyout').addEventListener('mouseleave',()=>{folderCloseTimer=setTimeout(closeFolderFlyout,250)});
+$('#tabs').addEventListener('mouseleave',()=>{folderCloseTimer=setTimeout(()=>{if(!$('#folderFlyout').matches(':hover'))closeFolderFlyout()},350)});
+$('#tabs').addEventListener('mouseenter',()=>clearTimeout(folderCloseTimer));
+document.addEventListener('click',e=>{if(!e.target.closest('.folderTab,#folderFlyout'))closeFolderFlyout();if(!e.target.closest('.classMenuWrap'))closeClassMenu()});
+window.addEventListener('resize',()=>{if(expandedFolder)positionFolderFlyout(expandedFolder)});
+function closeClassMenu(){const menu=$('#homeClassMenu');menu.hidden=true;$('#homeClassButton').setAttribute('aria-expanded','false')}
+$('#homeClassButton').onclick=e=>{e.stopPropagation();const menu=$('#homeClassMenu');menu.hidden=!menu.hidden;$('#homeClassButton').setAttribute('aria-expanded',String(!menu.hidden))};
+function ensurePresentationFrames(){
+ const valid=new Set(presentations.map(p=>p.frameId));
+ $$('.presentationFrame').forEach(f=>{if(!valid.has(f.dataset.frameId))f.remove()});
+ presentations.forEach(p=>{
+  let f=viewerHost.querySelector('[data-frame-id="'+p.frameId+'"]');
+  if(!f){
+   const src=embedUrl(p.url);
+   if(!src)return;
+   f=document.createElement('iframe');
+   f.className='presentationFrame';
+   f.dataset.frameId=p.frameId;
+   // Keep the presentation inside Home Base; use the Home Base Full Screen button to hide browser chrome.
+   f.allow='autoplay';
+   f.allowFullscreen=false;
+   f.referrerPolicy='strict-origin-when-cross-origin';
+   f.src=src;
+   f.hidden=true;
+   viewerHost.appendChild(f);
+  }
+ });
+}
+function loadActive(){
+ if(!presentations.length){
+  viewerHost.hidden=true;empty.hidden=false;
+  $$('.presentationFrame').forEach(f=>f.hidden=true);
+  return;
+ }
+ if(active>=presentations.length)active=0;
+ ensurePresentationFrames();
+ const current=presentations[active];
+ $$('.presentationFrame').forEach(f=>f.hidden=f.dataset.frameId!==current.frameId);
+ viewerHost.hidden=false;empty.hidden=true;
+}
+renderTabs(); loadActive();
+
+function openAddPresentation(){
+ setupNewPresentationColor();
+ refreshFolderOptions($('#presentationFolder'),null);
+ $('#modal').classList.add('show');
+}
+$('#add').onclick=openAddPresentation;
+$('#emptyAddPresentation').onclick=openAddPresentation;
+function closeModal(){$('#modal').classList.remove('show');$('#urlError').textContent=''}
+$('#modalClose').onclick=$('#cancel').onclick=closeModal;
+$('#save').onclick=()=>{
+ const name=$('#pname').value.trim(), url=$('#purl').value.trim(), converted=embedUrl(url);
+ if(!name){$('#urlError').textContent='Give this presentation a name.';return}
+ if(!converted){$('#urlError').textContent='That does not look like a complete web link.';return}
+ presentations.push({name,url,color:newPresentationColor,folderId:$('#presentationFolder').value||null,frameId:uid('p')}); active=presentations.length-1;
+ homeBaseStorage.setItem('oae-homebase-new-presentations',JSON.stringify(presentations));homeBaseStorage.setItem('oae-homebase-new-active',active);
+ $('#pname').value='';$('#purl').value='';newPresentationColor='#dcf6f5';closeModal();normalizePresentationFolders();savePresentationOrganization();renderTabs();loadActive();
+};
+
+// Drag to reorder the eight classroom tools. Each drawer stays paired with its button.
+// Stored with the rest of the oae- data so backups preserve the order.
+const TOOL_ORDER_KEY='oae-homebase-tool-order';
+const toolSidebar=document.querySelector('.sidebar');
+const classroomToolButtons=()=>Array.from(toolSidebar.querySelectorAll('button.brandTool[data-drawer]'));
+function applyToolOrder(order){
+ const buttons=classroomToolButtons();
+ const byId=new Map(buttons.map(b=>[b.dataset.drawer,b]));
+ const ordered=[...new Set([...(Array.isArray(order)?order:[]),...buttons.map(b=>b.dataset.drawer)])].filter(id=>byId.has(id));
+ const footerAnchor=toolSidebar.querySelector('.spacer');
+ for(const id of ordered){
+  const btn=byId.get(id), drawer=document.getElementById(id);
+  toolSidebar.insertBefore(btn,footerAnchor);
+  // Timer's extra mode switch and stopwatch drawer must remain with the Timer.
+  if(id==='timerDrawer'){
+   const tabs=document.getElementById('timeModeTabs');
+   if(tabs)toolSidebar.insertBefore(tabs,footerAnchor);
+  }
+  if(drawer)toolSidebar.insertBefore(drawer,footerAnchor);
+  if(id==='timerDrawer'){
+   const stopwatch=document.getElementById('stopwatchDrawer');
+   if(stopwatch)toolSidebar.insertBefore(stopwatch,footerAnchor);
+  }
+ }
+}
+try{applyToolOrder(JSON.parse(homeBaseStorage.getItem(TOOL_ORDER_KEY)||'[]'));}catch(_){applyToolOrder([])}
+let draggedTool=null, didDragTool=false;
+classroomToolButtons().forEach(btn=>{
+ btn.draggable=true;
+ btn.title='Drag to reorder tools';
+ btn.addEventListener('dragstart',e=>{
+  draggedTool=btn;didDragTool=true;
+  btn.classList.add('toolDragging');
+  if(e.dataTransfer){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',btn.dataset.drawer)}
+ });
+ btn.addEventListener('dragover',e=>{
+  if(!draggedTool||draggedTool===btn)return;
+  e.preventDefault();
+  if(e.dataTransfer)e.dataTransfer.dropEffect='move';
+  btn.classList.add('toolDropTarget');
+ });
+ btn.addEventListener('dragleave',()=>btn.classList.remove('toolDropTarget'));
+ btn.addEventListener('drop',e=>{
+  e.preventDefault();
+  btn.classList.remove('toolDropTarget');
+  if(!draggedTool||draggedTool===btn)return;
+  const order=classroomToolButtons().map(b=>b.dataset.drawer);
+  const from=order.indexOf(draggedTool.dataset.drawer),to=order.indexOf(btn.dataset.drawer);
+  if(from<0||to<0)return;
+  order.splice(from,1);order.splice(to,0,draggedTool.dataset.drawer);
+  applyToolOrder(order);
+  homeBaseStorage.setItem(TOOL_ORDER_KEY,JSON.stringify(order));
+ });
+ btn.addEventListener('dragend',()=>{
+  classroomToolButtons().forEach(b=>b.classList.remove('toolDragging','toolDropTarget'));
+  draggedTool=null;
+  setTimeout(()=>{didDragTool=false},0);
+ });
+});
+
+$$('.tool[data-drawer]').forEach(b=>b.onclick=()=>{
+ if(didDragTool)return;
+ const d=$('#'+b.dataset.drawer);
+ const opening=!d.classList.contains('show');
+ d.classList.toggle('show',opening);
+ b.classList.toggle('active',opening);
+});
+
+function updateClock(){
+ const d=new Date(); $('#clockTime').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+ $('#clockDate').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
+} updateClock(); setInterval(updateClock,1000);
+setInterval(()=>{const d=$('#clockTime'),p=$('#clockSlideDisplay'),date=$('#clockDate'),slideDate=$('#clockSlideDate');if(d&&p)p.textContent=d.textContent;if(date&&slideDate)slideDate.textContent=date.textContent},500);
+
+let timerTotal=300;
+let timerStartingSeconds=300; // Set only from sidebar inputs / initial launch, not quick adjustments.
+let timerLeft=300,timerInt=null;
+function fmt(s){s=Math.max(0,s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+
+function syncSlideTimer(){
+ const total=Math.max(1,timerTotal||timerLeft||1);
+ const pct=Math.max(0,Math.min(100,(timerLeft/total)*100));
+ $('#timerSlideDisplay').textContent=fmt(timerLeft);
+ $('#timerFill').style.width=pct+'%';
+ $('#timerOverlay').classList.toggle('ending',pct<=20);
+}
+function timerFromInputs(){timerLeft=(Math.max(0,+$('#mins').value||0)*60)+Math.min(59,Math.max(0,+$('#secs').value||0));timerStartingSeconds=timerLeft;timerTotal=Math.max(1,timerLeft);$('#timerDisplay').textContent=fmt(timerLeft);syncSlideTimer()}
+$('#mins').oninput=$('#secs').oninput=timerFromInputs;
+
+function syncTimerPauseButton(){
+ if($('#timerOverlayPause')) $('#timerOverlayPause').textContent=timerInt?'Pause':(timerLeft===timerStartingSeconds?'Start':'Resume');
+}
+
+$('#timerStart').onclick=()=>{
+ $('#timerOverlay').classList.add('show');
+ if(timerInt){
+   clearInterval(timerInt); timerInt=null; $('#timerStart').textContent='Start';syncTimerPauseButton(); return;
+ }
+ if(timerLeft<=0) timerFromInputs();
+ timerTotal=Math.max(1,timerLeft);
+ syncSlideTimer();
+ $('#timerStart').textContent='Pause';
+ timerInt=setInterval(()=>{
+   timerLeft--;
+   $('#timerDisplay').textContent=fmt(timerLeft);
+   syncSlideTimer();
+   if(timerLeft<=0){
+     timerLeft=0; syncSlideTimer();
+     clearInterval(timerInt); timerInt=null;
+     $('#timerStart').textContent='Start';
+     $('#timerDisplay').textContent='TIME!';
+     playTimerChime();syncTimerPauseButton();
+   }
+ },1000);
+ syncTimerPauseButton();
+};
+function resetCountdown(){
+ clearInterval(timerInt);timerInt=null;
+ timerLeft=timerStartingSeconds;timerTotal=Math.max(1,timerStartingSeconds);
+ $('#timerDisplay').textContent=fmt(timerLeft);
+ $('#timerStart').textContent='Start';
+ $('#timerOverlay').classList.remove('ending');
+ syncSlideTimer();syncTimerPauseButton();
+}
+$('#timerReset').onclick=resetCountdown;
+$('#timerOverlayReset').onclick=e=>{e.stopPropagation();resetCountdown();};
+
+
+const clockTool=document.querySelector('[data-drawer="clockDrawer"]');
+const clockDisplayBtn=$('#clockDisplayBtn');
+if(clockDisplayBtn) clockDisplayBtn.onclick=e=>{
+ e.stopPropagation();
+ const d=$('#clockTime'),p=$('#clockSlideDisplay');
+ if(d&&p)p.textContent=d.textContent;
+ const date=$('#clockDate'),slideDate=$('#clockSlideDate');if(date&&slideDate)slideDate.textContent=date.textContent;
+ $('#clockOverlay').classList.add('show');
+};
+$('#clockOverlayClose').onclick=e=>{e.stopPropagation();$('#clockOverlay').classList.remove('show')};
+
+$('#timerOverlayClose').onclick=e=>{e.stopPropagation();$('#timerOverlay').classList.remove('show')};
+$('#timerOverlayPause').onclick=e=>{
+ e.stopPropagation();
+ if(timerInt){
+  clearInterval(timerInt);timerInt=null;$('#timerStart').textContent='Start';
+ }else if(timerLeft>0){
+  $('#timerStart').textContent='Pause';
+  timerInt=setInterval(()=>{
+   timerLeft--;$('#timerDisplay').textContent=fmt(timerLeft);syncSlideTimer();
+   if(timerLeft<=0){timerLeft=0;syncSlideTimer();clearInterval(timerInt);timerInt=null;$('#timerStart').textContent='Start';$('#timerDisplay').textContent='TIME!';playTimerChime();syncTimerPauseButton()}
+  },1000);
+ }
+ syncTimerPauseButton();
+};
+$('#timerPlus10').onclick=e=>{e.stopPropagation();timerLeft+=10;timerTotal=Math.max(timerTotal,timerLeft);$('#timerDisplay').textContent=fmt(timerLeft);syncSlideTimer()};
+function addTimerSeconds(seconds){timerLeft+=seconds;timerTotal=Math.max(timerTotal,timerLeft);$('#timerDisplay').textContent=fmt(timerLeft);syncSlideTimer();syncTimerPauseButton()}
+$('#timerPlus60').onclick=e=>{e.stopPropagation();addTimerSeconds(60)};
+$('#timerPlus300').onclick=e=>{e.stopPropagation();addTimerSeconds(300)};
+$('#timerMinus10').onclick=e=>{e.stopPropagation();timerLeft=Math.max(0,timerLeft-10);$('#timerDisplay').textContent=fmt(timerLeft);syncSlideTimer();if(timerLeft===0&&timerInt){clearInterval(timerInt);timerInt=null;$('#timerStart').textContent='Start';syncTimerPauseButton()}};
+
+
+let sw=0,swInt=null;
+function syncStopwatch(){
+ const val=fmt(sw);
+ $('#swDisplay').textContent=val;
+ $('#swSlideDisplay').textContent=val;
+}
+$('#swStart').onclick=()=>{
+ $('#stopwatchOverlay').classList.add('show');
+ if(swInt){clearInterval(swInt);swInt=null;$('#swStart').textContent='Start';return}
+ $('#swStart').textContent='Pause';
+ swInt=setInterval(()=>{sw++;syncStopwatch()},1000);
+};
+$('#swReset').onclick=()=>{
+ clearInterval(swInt);swInt=null;sw=0;syncStopwatch();$('#swStart').textContent='Start';$('#swOverlayStop').textContent='Start';
+};
+$('#stopwatchOverlayClose').onclick=e=>{e.stopPropagation();$('#stopwatchOverlay').classList.remove('show')};
+$('#swOverlayStop').onclick=e=>{e.stopPropagation();if(swInt){clearInterval(swInt);swInt=null;$('#swOverlayStop').textContent='Start';$('#swStart').textContent='Start';}else{$('#swOverlayStop').textContent='Stop';$('#swStart').textContent='Pause';swInt=setInterval(()=>{sw++;syncStopwatch()},1000);}};
+$('#swOverlayReset').onclick=e=>{e.stopPropagation();$('#swReset').click();$('#swOverlayStop').textContent='Start';};
+
+const defaultVoice=[
+ {num:'0',word:'Silent',color:'#d7a8ad'},
+ {num:'1',word:'Whisper',color:'#e4c878'},
+ {num:'2',word:'Partner',color:'#9db7c9'},
+ {num:'3',word:'Table Talk',color:'#a9bea1'}
+];
+const defaultSupplies=[
+ {id:'pencil',icon:'✏️',name:'Pencil',color:'#fde3ec',border:'#ee8eb0'},
+ {id:'notebook',icon:'📓',name:'Notebook',color:'#dcf6f5',border:'#68c9c6'},
+ {id:'folder',icon:'📁',name:'Folder',color:'#eee3fb',border:'#ae8bdd'},
+ {id:'computer',icon:'💻',name:'Computer',color:'#fff1c9',border:'#e9bd51'},
+ {id:'gluestick',icon:'🧴',name:'Glue Stick',color:'#ffe2cf',border:'#ed9a62'},
+ {id:'markers',icon:'🖍️',name:'Markers',color:'#fde3ec',border:'#ee8eb0'},
+ {id:'whiteboard',icon:'📝',name:'Dry Erase Board + Marker',color:'#dcf6f5',border:'#68c9c6'},
+ {id:'clipboard',icon:'📋',name:'Clipboard',color:'#eee3fb',border:'#ae8bdd'},
+ {id:'scissors',icon:'✂️',name:'Scissors',color:'#e4f4d9',border:'#92c978'},
+ {id:'book',icon:'📖',name:'Book',color:'#fff1c9',border:'#e9bd51'},
+ {id:'crayons',icon:'🖍️',name:'Crayons',color:'#fde3ec',border:'#ee8eb0'}
+];
+let voiceOptions=JSON.parse(homeBaseStorage.getItem('oae-voice-options')||'null')||defaultVoice;
+let supplyOptions=JSON.parse(homeBaseStorage.getItem('oae-supply-options')||'null')||defaultSupplies;
+const voicePalette=['#d7a8ad','#e4c878','#9db7c9','#a9bea1','#b5a6c8','#8fbdb6'];
+voiceOptions=voiceOptions.map((v,i)=>({...v,color:v.color||voicePalette[i%voicePalette.length]}));
+const canonicalSupplies=defaultSupplies;
+supplyOptions=supplyOptions.filter(x=>!['chromebook','glue'].includes(x.id) && !['Chromebook','Glue'].includes(x.name));
+canonicalSupplies.forEach(x=>{
+ const existing=supplyOptions.find(y=>y.id===x.id||y.name===x.name);
+ if(existing){Object.assign(existing,x)}
+ else supplyOptions.push({...x});
+});
+saveSettings();
+let memoColor=homeBaseStorage.getItem('oae-memo-color')||'#f7bfd2';
+let statusBarColor=homeBaseStorage.getItem('oae-status-bar-color')||'#d9f3f1';
+let swWidth=Number(homeBaseStorage.getItem('oae-stopwatch-width'))||170;
+let clockWidth=Number(homeBaseStorage.getItem('oae-clock-width'))||190;
+let timerMode=homeBaseStorage.getItem('oae-timer-mode')||'visual';
+let timerChimeEnabled=homeBaseStorage.getItem('oae-timer-chime')!=='false';
+let timerWidth=Number(homeBaseStorage.getItem('oae-timer-width'))||170;
+let statusBarSize=homeBaseStorage.getItem('oae-status-bar-size')||'small';
+let legacyClassListText=homeBaseStorage.getItem('oae-class-list')||'';
+let classes=[];try{classes=JSON.parse(homeBaseStorage.getItem('oae-classes')||'[]')}catch(e){}
+if(!Array.isArray(classes)||!classes.length)classes=[{id:'class_'+Date.now().toString(36),name:'My Class',list:legacyClassListText}];
+let activeClassId=homeBaseStorage.getItem('oae-active-class-id')||classes[0].id;if(!classes.some(c=>c.id===activeClassId))activeClassId=classes[0].id;let settingsClassId=activeClassId;
+let classFolders=[];try{classFolders=JSON.parse(homeBaseStorage.getItem('oae-class-folders')||'[]')}catch(e){}if(!Array.isArray(classFolders))classFolders=[];
+let classFolderEditId=null,classFolderDeleteId=null,classFolderDraftColor='#b9ddd9';
+let classEditorMode='existing'; // existing | new
+let classDraft=null;
+let pickerRemaining=[];
+let lastGroupConfig={mode:'size',number:2};
+let voiceLevel='', supplies=[];
+
+function saveSettings(){
+ homeBaseStorage.setItem('oae-voice-options',JSON.stringify(voiceOptions));
+ homeBaseStorage.setItem('oae-supply-options',JSON.stringify(supplyOptions));
+}
+function renderVoiceButtons(){
+ const grid=$('#voiceDrawer .voiceGrid'); grid.innerHTML='';
+ voiceOptions.forEach((v,i)=>{
+  const b=document.createElement('button'); b.className='voiceBtn';
+  b.dataset.level=i; b.textContent=v.num+' · '+v.word;
+  b.style.borderColor=v.color; b.style.borderWidth='2px';
+  if(voiceLevel===i){b.classList.add('selected');b.style.background=v.color;b.style.color='#263033'}
+  b.onclick=()=>{voiceLevel=i;renderVoiceButtons();renderStatus()};
+  grid.appendChild(b);
+ });
+}
+function renderSupplyButtons(){
+ const grid=$('#supplyGrid'); grid.innerHTML='';
+ supplyOptions.forEach(x=>{
+  const b=document.createElement('button'); b.className='supplyBtn';
+  b.innerHTML='<span class="supplyIcon">'+x.icon+'</span><span class="supplyName"></span>';
+  b.querySelector('.supplyName').textContent=x.name;
+  b.style.background=x.color||'#f4f2ee'; b.style.borderColor=x.border||'#d8d3cc';
+  if(supplies.includes(x.id))b.classList.add('selected');
+  b.onclick=()=>{const i=supplies.indexOf(x.id);if(i>=0)supplies.splice(i,1);else supplies.push(x.id);renderSupplyButtons();renderStatus()};
+  grid.appendChild(b);
+ });
+}
+
+
+
+function syncStageBars(){
+ const stage=document.querySelector('.stage');
+ const memo=$('#memoBanner');
+ const status=$('#statusStrip');
+ if(!stage)return;
+ requestAnimationFrame(()=>{
+  const memoOn=!!(memo && memo.classList.contains('show') && getComputedStyle(memo).display!=='none');
+  const statusOn=!!(status && getComputedStyle(status).display!=='none');
+  stage.style.setProperty('--memo-reserve',memoOn?Math.ceil(memo.getBoundingClientRect().height)+'px':'0px');
+  stage.style.setProperty('--status-reserve',statusOn?Math.ceil(status.getBoundingClientRect().height)+'px':'0px');
+  window.dispatchEvent(new Event('resize'));
+ });
+}
+
+function applyStatusBarSize(){
+ const strip=$('#statusStrip');
+ if(!strip)return;
+ strip.classList.remove('status-medium','status-large');
+ if(statusBarSize==='medium')strip.classList.add('status-medium');
+ if(statusBarSize==='large')strip.classList.add('status-large');
+ $$('input[name="statusBarSize"]').forEach(r=>r.checked=r.value===statusBarSize);
+ syncStageBars();
+}
+function renderStatus(){
+ const strip=$('#statusStrip'); strip.innerHTML='';
+ const quickClose=document.createElement('button');
+ quickClose.className='barQuickClose';quickClose.type='button';quickClose.title='Hide visual display bar';quickClose.textContent='×';
+ quickClose.onclick=e=>{e.stopPropagation();voiceLevel='';supplies=[];renderVoiceButtons();renderSupplyButtons();renderStatus()};
+ strip.appendChild(quickClose);
+ if(voiceLevel!=='' && voiceOptions[voiceLevel]){
+   const v=voiceOptions[voiceLevel], chip=document.createElement('div'); chip.className='statusChip';
+   chip.textContent='Voice '+v.num+': '+v.word; chip.style.borderLeft='8px solid '+v.color; chip.style.fontSize='16px'; chip.style.padding='7px 12px'; strip.appendChild(chip);
+ }
+ const chosen=supplyOptions.filter(x=>supplies.includes(x.id));
+ if(chosen.length){
+   const box=document.createElement('div'); box.className='suppliesDisplay';
+   const label=document.createElement('div'); label.className='suppliesLabel'; label.textContent='Supplies:'; box.appendChild(label);
+   chosen.forEach(x=>{
+    const item=document.createElement('div'); item.className='studentSupply';
+    item.style.background=x.color||'#f4f2ee'; item.style.borderColor=x.border||'#d8d3cc';
+    item.innerHTML='<span class="bigIcon">'+x.icon+'</span><small></small>'; item.querySelector('small').textContent=x.name; box.appendChild(item);
+   }); strip.appendChild(box);
+ }
+ strip.style.display=(voiceLevel!==''||supplies.length)?'flex':'none';
+ applyStatusBarSize();
+ syncStageBars();
+}
+renderVoiceButtons();renderSupplyButtons();renderStatus();
+
+$('#msgSave').onclick=()=>{const v=$('#msgInput').value.trim();if(!v)return;$('#memoText').textContent=v;$('#memoBanner').classList.add('show')};
+$('#msgInput').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.shiftKey){
+  e.preventDefault();
+  $('#msgSave').click();
+ }
+});
+function clearMemo(){$('#memoBanner').classList.remove('show');$('#memoText').textContent='';$('#msgInput').value=''}
+$('#msgClear').onclick=clearMemo;$('#memoClose').onclick=()=>{$('#memoBanner').classList.remove('show');syncStageBars()};
+$('#voiceClear').onclick=()=>{voiceLevel='';renderVoiceButtons();renderStatus()};
+$('#suppliesClear').onclick=()=>{supplies=[];renderSupplyButtons();renderStatus()};
+
+
+
+
+function activeClass(){return classes.find(c=>c.id===activeClassId)||classes[0]}
+function settingsClass(){
+ return classes.find(c=>c.id===settingsClassId)||activeClass();
+}
+function saveClasses(){
+ homeBaseStorage.setItem('oae-classes',JSON.stringify(classes));
+ homeBaseStorage.setItem('oae-class-folders',JSON.stringify(classFolders));
+ homeBaseStorage.setItem('oae-active-class-id',activeClassId);
+}
+function parseClassList(text=(activeClass()?.list||'')){
+ return text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(row=>{
+  const m=row.match(/^(.+?)(?:\s*\(([^)]*)\)\s*)?$/);
+  return {name:(m?.[1]||row).trim(),excludes:(m?.[2]||'').split(',').map(x=>x.trim()).filter(Boolean)};
+ }).filter(s=>s.name);
+}
+function getClassNames(){return parseClassList().map(s=>s.name)}
+function separationPairs(){
+ const students=parseClassList(),canonical=new Map(students.map(s=>[s.name.toLowerCase(),s.name])),pairs=new Set();
+ students.forEach(s=>s.excludes.forEach(raw=>{
+  const other=canonical.get(raw.toLowerCase());
+  if(other&&other!==s.name)pairs.add([s.name,other].sort((a,b)=>a.localeCompare(b)).join('|||'));
+ }));
+ return pairs;
+}
+function groupsRespectSeparations(groups,pairs){
+ return groups.every(g=>{
+  for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++)
+   if(pairs.has([g[i],g[j]].sort((a,b)=>a.localeCompare(b)).join('|||')))return false;
+  return true;
+ });
+}
+function chooseClassFromMenu(c){
+ activeClassId=c.id;settingsClassId=activeClassId;classEditorMode='existing';classDraft=null;pickerRemaining=[];saveClasses();updatePickerRemaining();$('#pickerResultOverlay').classList.remove('show');$('#groupsResultOverlay').classList.remove('show');closeClassMenu();renderHomeClassSelector();
+}
+function renderHomeClassSelector(){
+ const menu=$('#homeClassMenu'),button=$('#homeClassButton');if(!menu||!button)return;
+ menu.innerHTML='';const current=classes.find(c=>c.id===activeClassId);button.textContent=(current?current.name:'Classes')+' ▾';button.title='Choose class';
+ const scroll=document.createElement('div');scroll.className='classMenuScroll';menu.appendChild(scroll);
+ function addClassOption(parent,c){const b=document.createElement('button');b.type='button';b.textContent=(c.id===activeClassId?'✓  ':'    ')+c.name;b.className=c.id===activeClassId?'selected':'';b.onclick=e=>{e.stopPropagation();chooseClassFromMenu(c)};parent.appendChild(b)}
+ // Inline expanding folders avoid submenu clipping at the edge of the screen.
+ classFolders.forEach(f=>{
+  const wrap=document.createElement('div');wrap.className='classFolderMenuItem';
+  const trigger=document.createElement('button');trigger.type='button';trigger.textContent='📁 '+f.name+'  ▸';trigger.style.borderLeft='4px solid '+(f.color||'#b9ddd9');
+  const sub=document.createElement('div');sub.className='classFolderInlineList';sub.hidden=true;
+  const items=classes.filter(c=>c.folderId===f.id);if(items.length)items.forEach(c=>addClassOption(sub,c));else{const empty=document.createElement('div');empty.className='hint';empty.style.padding='9px';empty.textContent='No classes in this folder';sub.appendChild(empty)}
+  const open=()=>{scroll.querySelectorAll('.classFolderInlineList').forEach(el=>{if(el!==sub)el.hidden=true});sub.hidden=false;trigger.textContent='📂 '+f.name+'  ▾'};
+  trigger.onclick=e=>{e.stopPropagation();if(sub.hidden)open();else{sub.hidden=true;trigger.textContent='📁 '+f.name+'  ▸'}};
+  trigger.onmouseenter=open;
+  wrap.append(trigger,sub);scroll.appendChild(wrap);
+ });
+ classes.filter(c=>!c.folderId||!classFolders.some(f=>f.id===c.folderId)).forEach(c=>addClassOption(scroll,c));
+}
+let draggingClassItem=null;
+function classDragStart(e,type,id){draggingClassItem={type,id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',type+':'+id)}
+function classDropOn(e,type,id){
+ e.preventDefault();e.stopPropagation();const item=draggingClassItem;draggingClassItem=null;if(!item)return;
+ if(item.type==='folder'&&type==='folder'&&item.id!==id){
+  const from=classFolders.findIndex(f=>f.id===item.id),to=classFolders.findIndex(f=>f.id===id);if(from<0||to<0)return;
+  classFolders.splice(to,0,...classFolders.splice(from,1));
+ }else if(item.type==='class'){
+  const moving=classes.find(c=>c.id===item.id);if(!moving)return;
+  if(type==='folder'){moving.folderId=id;const i=classes.indexOf(moving);classes.splice(i,1);const siblings=classes.filter(c=>c.folderId===id);const last=siblings[siblings.length-1];classes.splice(last?classes.indexOf(last)+1:classes.length,0,moving)}
+  else if(type==='unfiled'){moving.folderId=null}
+  else if(type==='class'&&item.id!==id){const target=classes.find(c=>c.id===id);if(!target)return;moving.folderId=target.folderId||null;classes.splice(classes.indexOf(moving),1);classes.splice(classes.indexOf(target),0,moving)}
+ }
+ saveClasses();updateClassListUI();
+}
+function makeClassDragTarget(el,type,id){
+ el.draggable=true;el.ondragstart=e=>classDragStart(e,type,id);el.ondragend=()=>{draggingClassItem=null};
+ el.ondragover=e=>{if(draggingClassItem&&(draggingClassItem.type==='class'||type==='folder')){e.preventDefault();el.classList.add('classDragOver')}};
+ el.ondragleave=()=>el.classList.remove('classDragOver');
+ el.ondrop=e=>{el.classList.remove('classDragOver');classDropOn(e,type,id)};
+}
+function renderClassFolders(){
+ const root=$('#classFolderList');if(!root)return;root.innerHTML='';
+ classFolders.forEach(f=>{
+  const row=document.createElement('div');row.className='classFolderRow';makeClassDragTarget(row,'folder',f.id);
+  const grip=document.createElement('span');grip.textContent='⠿';grip.title='Drag to reorder folder';row.appendChild(grip);
+  const dot=document.createElement('span');dot.className='classFolderDot';dot.style.background=f.color||'#b9ddd9';row.appendChild(dot);
+  const label=document.createElement('span');label.className='classFolderName';label.textContent=f.name+' ('+classes.filter(c=>c.folderId===f.id).length+')';row.appendChild(label);
+  const edit=document.createElement('button');edit.textContent='Edit';edit.onclick=()=>openClassFolderEditor(f.id);row.appendChild(edit);
+  const del=document.createElement('button');del.textContent='Delete';del.onclick=()=>openClassFolderDelete(f.id);row.appendChild(del);root.appendChild(row);
+ });
+}
+function openClassFolderEditor(id=null){classFolderEditId=id;const f=classFolders.find(x=>x.id===id);$('#classFolderModalTitle').textContent=f?'Edit Class Folder':'New Class Folder';$('#classFolderName').value=f?.name||'';classFolderDraftColor=f?.color||'#b9ddd9';$('#classFolderColorPreview').style.background=classFolderDraftColor;fillColorSwatches($('#classFolderColorPalette'),classFolderDraftColor,c=>{classFolderDraftColor=c;$('#classFolderColorPreview').style.background=c;$('#classFolderColorPalette').classList.remove('show')});$('#classFolderColorPalette').classList.remove('show');$('#classFolderError').textContent='';$('#classFolderModal').classList.add('show');$('#classFolderName').focus()}
+function openClassFolderDelete(id){classFolderDeleteId=id;const f=classFolders.find(x=>x.id===id);if(!f)return;const n=classes.filter(c=>c.folderId===id).length;$('#classFolderDeleteIntro').textContent='Delete “'+f.name+'”? This folder contains '+n+' class list'+(n===1?'':'s')+'.';$('#classFolderDeleteModal').querySelector('input[value="keep"]').checked=true;$('#classFolderDeleteModal').classList.add('show')}
+$('#classFolderColorEdit').onclick=e=>{e.stopPropagation();$$('.colorPalettePopover.show').forEach(x=>{if(x!==$('#classFolderColorPalette'))x.classList.remove('show')});$('#classFolderColorPalette').classList.toggle('show')};
+$('#classFolderModal').addEventListener('click',e=>{if(!e.target.closest('.colorEditWrap'))$('#classFolderColorPalette').classList.remove('show')});
+$('#addClassFolderBtn').onclick=()=>openClassFolderEditor();
+$('#classFolderClose').onclick=$('#classFolderCancel').onclick=()=>$('#classFolderModal').classList.remove('show');
+$('#classFolderSave').onclick=()=>{const name=$('#classFolderName').value.trim(),color=classFolderDraftColor;if(!name){$('#classFolderError').textContent='Enter a folder name.';return}if(classFolderEditId){const f=classFolders.find(x=>x.id===classFolderEditId);if(f){f.name=name;f.color=color}}else classFolders.push({id:'cf_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6),name,color});saveClasses();updateClassListUI();$('#classFolderModal').classList.remove('show')};
+$('#classFolderDeleteClose').onclick=$('#classFolderDeleteCancel').onclick=()=>$('#classFolderDeleteModal').classList.remove('show');
+$('#classFolderDeleteConfirm').onclick=()=>{const id=classFolderDeleteId,mode=$('#classFolderDeleteModal').querySelector('input[name="classFolderDeleteMode"]:checked')?.value;if(mode==='delete'){
+  const remaining=classes.filter(c=>c.folderId!==id);if(!remaining.length){alert('Keep at least one class list. Move a class out of this folder first, or choose Keep class lists.');return}classes=remaining;if(!classes.some(c=>c.id===activeClassId))activeClassId=classes[0].id;if(!classes.some(c=>c.id===settingsClassId))settingsClassId=activeClassId;
+ }else classes.forEach(c=>{if(c.folderId===id)c.folderId=null});classFolders=classFolders.filter(f=>f.id!==id);pickerRemaining=[];saveClasses();updateClassListUI();$('#classFolderDeleteModal').classList.remove('show')};
+function renderClassSettings(){
+ const tabs=$('#classTabs');if(!tabs)return;tabs.innerHTML='';
+ function classTab(item){
+  const b=document.createElement('button');b.type='button';b.className='classTab'+(classEditorMode==='existing'&&item.id===settingsClassId?' active':'');
+  b.textContent='⠿  '+item.name;b.title='Drag to reorder or move to another folder. Click to edit.';
+  b.onclick=()=>{classEditorMode='existing';classDraft=null;settingsClassId=item.id;renderClassSettings()};
+  makeClassDragTarget(b,'class',item.id);tabs.appendChild(b);
+ }
+ classFolders.forEach(f=>{
+  const heading=document.createElement('div');heading.className='classTabFolderHeading';heading.textContent='📁 '+f.name;
+  heading.style.borderLeft='5px solid '+(f.color||'#b9ddd9');makeClassDragTarget(heading,'folder',f.id);tabs.appendChild(heading);
+  classes.filter(c=>c.folderId===f.id).forEach(classTab);
+ });
+ const unfiled=document.createElement('div');unfiled.className='classTabFolderHeading';unfiled.textContent='Unfiled classes';makeClassDragTarget(unfiled,'unfiled','');tabs.appendChild(unfiled);
+ classes.filter(c=>!c.folderId||!classFolders.some(f=>f.id===c.folderId)).forEach(classTab);
+ const addTop=document.createElement('button');addTop.type='button';addTop.className='classTab';addTop.id='addClassBtn';addTop.textContent='+ Add Class';
+ addTop.onclick=()=>{classEditorMode='new';classDraft={name:'',list:''};settingsClassId=null;renderClassSettings();$('#classNameInput').focus()};tabs.appendChild(addTop);
+ renderClassFolders();
+ const folderSelect=$('#classFolderSelect');folderSelect.innerHTML='<option value="">No folder (standalone)</option>';classFolders.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.name;folderSelect.appendChild(o)});
+ const nameInput=$('#classNameInput'),listInput=$('#classListInput'),count=$('#classListCount');
+ const saveBtn=$('#saveClassBtn'),cancelBtn=$('#cancelClassBtn'),deleteBtn=$('#deleteClassBtn'),deleteRow=$('#classDeleteRow');
+
+ if(classEditorMode==='new'){
+  classDraft=classDraft||{name:'',list:''};
+  folderSelect.value=classDraft.folderId||'';
+  nameInput.value=classDraft.name;
+  listInput.value=classDraft.list;
+  const n=parseClassList(classDraft.list).length;
+  count.textContent='New class · '+n+' student'+(n===1?'':'s')+' · not saved yet';
+  saveBtn.textContent='Save Class';
+  cancelBtn.hidden=false;
+  deleteBtn.hidden=true;
+  if(deleteRow)deleteRow.hidden=true;
+ }else{
+  const c=settingsClass();
+  if(!c)return;
+  folderSelect.value=c.folderId||'';
+  nameInput.value=c.name;
+  listInput.value=c.list||'';
+  const n=parseClassList(c.list||'').length;
+  count.textContent=n+' student'+(n===1?'':'s')+(c.id===activeClassId?' · currently selected':'');
+  saveBtn.textContent='Save Changes';
+  cancelBtn.hidden=true;
+  deleteBtn.hidden=classes.length<=1;
+  if(deleteRow)deleteRow.hidden=classes.length<=1;
+ }
+}
+function updateClassListUI(){
+ renderHomeClassSelector();
+ renderClassSettings();
+ updatePickerRemaining();
+}
+function updatePickerRemaining(){const el=$('#pickerRemaining');if(!el)return;const total=getClassNames().length,c=activeClass();if(!total){el.textContent=c.name+' · add students with the pencil next to Classes.';return}el.textContent=$('#pickerNoRepeats')?.checked?c.name+' · '+pickerRemaining.length+' of '+total+' names remaining in this round':c.name+' · '+total+' names available · repeats allowed'}
+function shuffled(arr){
+ const a=[...arr];
+ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+ return a;
+}
+function pickRandomName(){
+ const names=getClassNames();
+ if(!names.length){alert('Add students using the pencil next to Classes first.');return}
+ let chosen;
+ if($('#pickerNoRepeats').checked){
+  const currentNames=new Set(names);
+  pickerRemaining=pickerRemaining.filter(n=>currentNames.has(n));
+  if(!pickerRemaining.length)pickerRemaining=shuffled(names);
+  chosen=pickerRemaining.pop();
+ }else chosen=names[Math.floor(Math.random()*names.length)];
+ $('#pickerResultName').textContent=chosen;
+ $('#pickerResultOverlay').classList.add('show');
+ requestAnimationFrame(fitPickerName);
+ updatePickerRemaining();
+}
+function populateGroupNumbers(){
+ const select=$('#groupNumber'); if(!select)return;
+ const previous=Number(select.value)||lastGroupConfig.number||2;
+ select.innerHTML='';
+ for(let i=2;i<=18;i++){const o=document.createElement('option');o.value=i;o.textContent=i;select.appendChild(o)}
+ select.value=String(Math.max(2,Math.min(18,previous)));
+}
+function updateGroupModeUI(){
+ const mode=$('#groupMode').value;
+ $('#groupNumberLabel').textContent=mode==='size'?'Students per group (2–18)':'Number of groups (2–18)';
+}
+function buildGroups(){
+ const baseNames=getClassNames();
+ if(!baseNames.length){alert('Add a class list using the pencil next to the class selector first.');return}
+ const mode=$('#groupMode').value,requested=Number($('#groupNumber').value)||2;
+ let groupCount=mode==='size'?Math.max(1,Math.ceil(baseNames.length/requested)):Math.max(1,Math.min(requested,baseNames.length));
+ const pairs=separationPairs();let groups=null;
+ for(let attempt=0;attempt<(pairs.size?600:1);attempt++){
+  const names=shuffled(baseNames),candidate=Array.from({length:groupCount},()=>[]);
+  names.forEach((name,i)=>candidate[i%groupCount].push(name));
+  if(groupsRespectSeparations(candidate,pairs)){groups=candidate;break}
+ }
+ if(!groups){alert('We couldn’t make groups that meet every separation request. Try a different group size/number of groups or review the names in parentheses in your Class List.');return}
+ lastGroupConfig={mode,number:requested};
+ $('#groupsTitle').textContent=mode==='size'?'Groups · about '+requested+' students each':groupCount+' Groups';
+ const grid=$('#groupsGrid');grid.innerHTML='';
+ groups.forEach((g,i)=>{
+  const card=document.createElement('div');card.className='groupCard';
+  const title=document.createElement('b');title.textContent='Group '+(i+1);
+  const list=document.createElement('div');
+  g.forEach(name=>{const line=document.createElement('div');line.textContent=name;list.appendChild(line)});
+  card.append(title,list);grid.appendChild(card);
+ });
+ // Shuffling an already-visible result must preserve the teacher's position and size.
+ // Only a newly opened result receives the default centered dimensions.
+ const groupsOverlay=$('#groupsResultOverlay');
+ const alreadyVisible=groupsOverlay.classList.contains('show');
+ if(!alreadyVisible)groupsManualResize=false;
+ groupsOverlay.classList.add('show');
+ requestAnimationFrame(alreadyVisible?fitGroupsOverlay:sizeGroupsOverlayForContent);
+}
+function makeBackup(){
+ const data={format:'OAE Classroom Home Base Backup',version:1,created:new Date().toISOString(),storage:{}};
+ for(let i=0;i<homeBaseStorage.length;i++){
+  const key=homeBaseStorage.key(i);
+  if(key && key.startsWith('oae-'))data.storage[key]=homeBaseStorage.getItem(key);
+ }
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const a=document.createElement('a');
+ const d=new Date(),stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ a.href=URL.createObjectURL(blob);a.download='OAE-Classroom-Home-Base-Backup-'+stamp+'.json';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ $('#backupStatus').textContent='Backup downloaded. Keep this file somewhere you can find it for future updates.';
+}
+function importBackupFile(file){
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const data=JSON.parse(reader.result);
+   if(!data || data.format!=='OAE Classroom Home Base Backup' || !data.storage)throw new Error('invalid');
+   Object.entries(data.storage).forEach(([key,value])=>{if(key.startsWith('oae-'))homeBaseStorage.setItem(key,String(value))});
+   $('#backupStatus').textContent='Backup restored. Reloading Home Base…';
+   setTimeout(()=>location.reload(),450);
+  }catch(e){$('#backupStatus').textContent='That file does not look like a Home Base backup.'}
+ };
+ reader.readAsText(file);
+}
+
+$('#pickNameBtn').onclick=pickRandomName;
+$('#resetPickerBtn').onclick=()=>{pickerRemaining=[];updatePickerRemaining();$('#pickerResultOverlay').classList.remove('show')};
+$('#pickerNoRepeats').onchange=()=>{pickerRemaining=[];updatePickerRemaining()};
+$('#pickerResultClose').onclick=()=>$('#pickerResultOverlay').classList.remove('show');
+$('#pickerOverlayShuffle').onclick=e=>{e.stopPropagation();pickRandomName()};
+populateGroupNumbers();updateGroupModeUI();
+$('#groupMode').onchange=updateGroupModeUI;
+$('#makeGroupsBtn').onclick=buildGroups;
+$('#shuffleGroupsBtn').onclick=buildGroups;
+$('#groupsResultClose').onclick=()=>$('#groupsResultOverlay').classList.remove('show');
+$('#groupsOverlayShuffle').onclick=e=>{e.stopPropagation();buildGroups()};
+$('#classFolderSelect').onchange=e=>{if(classEditorMode==='new'){classDraft=classDraft||{name:'',list:''};classDraft.folderId=e.target.value||null}};
+$('#classListInput').oninput=e=>{
+ if(classEditorMode==='new'){classDraft=classDraft||{name:'',list:''};classDraft.list=e.target.value}
+};
+$('#classNameInput').oninput=e=>{
+ if(classEditorMode==='new'){classDraft=classDraft||{name:'',list:''};classDraft.name=e.target.value}
+};
+
+$('#cancelClassBtn').onclick=()=>{
+ classEditorMode='existing';classDraft=null;settingsClassId=activeClassId;renderClassSettings();
+};
+$('#saveClassBtn').onclick=()=>{
+ const name=$('#classNameInput').value.trim();
+ const list=$('#classListInput').value;
+ if(!name){alert('Give this class a name before saving.');$('#classNameInput').focus();return}
+ if(classEditorMode==='new'){
+  const id='class_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+  classes.push({id,name,list,folderId:$('#classFolderSelect').value||null});
+  if(classes.length===1)activeClassId=id;
+  settingsClassId=null;
+  classEditorMode='new';
+  classDraft={name:'',list:''};
+ }else{
+  const c=settingsClass();if(!c)return;c.name=name;c.list=list;c.folderId=$('#classFolderSelect').value||null;
+ }
+ pickerRemaining=[];saveClasses();updateClassListUI();
+ if(classEditorMode==='new')$('#classNameInput').focus();
+};
+function moveSelectedClass(delta){const idx=classes.findIndex(c=>c.id===settingsClassId);if(idx<0)return;const c=classes[idx];const siblings=classes.filter(x=>(x.folderId||null)===(c.folderId||null));const pos=siblings.findIndex(x=>x.id===c.id),other=siblings[pos+delta];if(!other)return;const otherIdx=classes.findIndex(x=>x.id===other.id);[classes[idx],classes[otherIdx]]=[classes[otherIdx],classes[idx]];saveClasses();updateClassListUI()}
+// V72: removed obsolete Move Earlier / Move Later handlers; controls no longer exist.
+$('#deleteClassBtn').onclick=()=>{
+ if(classEditorMode!=='existing'||classes.length<=1)return;
+ const c=settingsClass();if(!c)return;
+ if(!confirm('Delete “'+c.name+'” and its student list?'))return;
+ const i=classes.findIndex(x=>x.id===c.id);classes.splice(i,1);
+ if(activeClassId===c.id)activeClassId=classes[Math.max(0,i-1)].id;
+ settingsClassId=activeClassId;classEditorMode='existing';classDraft=null;pickerRemaining=[];saveClasses();updateClassListUI();
+};
+
+$('#backupDataBtn').onclick=makeBackup;
+$('#importDataBtn').onclick=()=>$('#importDataFile').click();
+$('#importDataFile').onchange=e=>{const f=e.target.files?.[0];if(f)importBackupFile(f);e.target.value=''};
+saveClasses();
+updateClassListUI();
+applyStatusBarSize();
+
+const presetColors=['#f7bfd2','#fde3ec','#f6c7b5','#ffe2cf','#f4dc83','#fff1c9','#b9ddd9','#dcf6f5','#b8d7ea','#e3f0f8','#cbbce0','#eee3fb'];
+function fillColorSwatches(el,current,onPick){
+ if(!el)return;
+ el.innerHTML='';
+ presetColors.forEach(c=>{
+  const b=document.createElement('button');
+  b.type='button'; b.className='colorSwatch'+(String(c).toLowerCase()===String(current).toLowerCase()?' selected':'');
+  b.style.background=c; b.title=c; b.setAttribute('aria-label','Choose color '+c);
+  b.onclick=()=>onPick(c);
+  el.appendChild(b);
+ });
+}
+
+function setupNewPresentationColor(){
+ const preview=$('#newPresentationColorPreview'),palette=$('#newPresentationColorPalette'),edit=$('#newPresentationColorEdit');
+ if(!preview||!palette||!edit)return;
+ preview.style.background=newPresentationColor;
+ fillColorSwatches(palette,newPresentationColor,c=>{newPresentationColor=c;preview.style.background=c;palette.classList.remove('show')});
+ edit.onclick=e=>{e.stopPropagation();palette.classList.toggle('show')};
+}
+function applyMemoColor(){
+ const bar=$('#memoBanner');
+ bar.style.background=memoColor;
+ bar.style.borderBottomColor=memoColor;
+ const preview=$('#memoColorPreview');if(preview)preview.style.background=memoColor;
+ const palette=$('#memoColorPalette');
+ fillColorSwatches(palette,memoColor,c=>{memoColor=c;homeBaseStorage.setItem('oae-memo-color',memoColor);palette.classList.remove('show');applyMemoColor()});
+}
+
+function applyStatusBarColor(){
+ const bar=document.querySelector('.statusStrip');
+ if(bar){
+  bar.style.background=statusBarColor;
+  bar.style.borderTopColor=statusBarColor;
+ }
+ const preview=$('#statusBarColorPreview');if(preview)preview.style.background=statusBarColor;
+ const palette=$('#statusBarColorPalette');
+ fillColorSwatches(palette,statusBarColor,c=>{statusBarColor=c;homeBaseStorage.setItem('oae-status-bar-color',statusBarColor);palette.classList.remove('show');applyStatusBarColor()});
+}
+applyMemoColor();applyStatusBarColor();
+
+
+function applyTimerSettings(){
+ const timer=$('#timerOverlay');
+ timer.classList.toggle('countdown-only',timerMode==='countdown');
+ timer.style.width=Math.max(125,Math.min(360,timerWidth))+'px';
+ timer.style.setProperty('--timer-scale',Math.max(.85,Math.min(1.7,timerWidth/170)));
+ $$('input[name="timerMode"]').forEach(r=>r.checked=r.value===timerMode);
+ $('#timerChime').checked=timerChimeEnabled;
+}
+function playTimerChime(){
+ if(!timerChimeEnabled)return;
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  const ctx=new AudioCtx();
+  const now=ctx.currentTime;
+  [[659.25,0],[783.99,.18],[1046.5,.36]].forEach(([freq,delay])=>{
+   const osc=ctx.createOscillator(),gain=ctx.createGain();
+   osc.type='sine';osc.frequency.value=freq;
+   gain.gain.setValueAtTime(0.0001,now+delay);
+   gain.gain.exponentialRampToValueAtTime(.22,now+delay+.02);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+delay+.32);
+   osc.connect(gain);gain.connect(ctx.destination);
+   osc.start(now+delay);osc.stop(now+delay+.34);
+  });
+  setTimeout(()=>ctx.close(),1200);
+ }catch(e){}
+}
+
+function renderSettings(){
+ const vs=$('#voiceSettings');vs.innerHTML='';
+ voiceOptions.forEach((v,i)=>{
+  const row=document.createElement('div');row.className='settingsRow';
+  const num=document.createElement('input');num.value=v.num;num.oninput=e=>{voiceOptions[i].num=e.target.value;saveSettings();renderVoiceButtons();renderStatus()};
+  const word=document.createElement('input');word.value=v.word;word.oninput=e=>{voiceOptions[i].word=e.target.value;saveSettings();renderVoiceButtons();renderStatus()};
+  const colorWrap=document.createElement('div');colorWrap.className='voiceColorCompact';
+  const colorPreview=document.createElement('div');colorPreview.className='currentColorSwatch';colorPreview.style.background=v.color||voicePalette[i%voicePalette.length];
+  const editColor=document.createElement('button');editColor.type='button';editColor.className='colorEditBtn';editColor.textContent='✎';editColor.title='Edit voice level color';
+  const palette=document.createElement('div');palette.className='colorPalettePopover';
+  fillColorSwatches(palette,v.color||voicePalette[i%voicePalette.length],c=>{voiceOptions[i].color=c;saveSettings();renderSettings();renderVoiceButtons();renderStatus()});
+  editColor.onclick=e=>{e.stopPropagation();$$('.colorPalettePopover.show').forEach(x=>{if(x!==palette)x.classList.remove('show')});palette.classList.toggle('show')};
+  colorWrap.append(colorPreview,editColor,palette);
+  const del=document.createElement('button');del.className='miniDelete';del.textContent='×';del.onclick=()=>{voiceOptions.splice(i,1);voiceLevel='';saveSettings();renderSettings();renderVoiceButtons();renderStatus()};
+  row.append(num,word,colorWrap,del);vs.appendChild(row);
+ });
+ const ss=$('#supplySettings');ss.innerHTML='';
+ supplyOptions.forEach((x,i)=>{
+  const row=document.createElement('div');row.className='settingsRow';row.style.gridTemplateColumns='58px 1fr 38px';
+  const icon=document.createElement('input');icon.value=x.icon;icon.oninput=e=>{supplyOptions[i].icon=e.target.value;saveSettings();renderSupplyButtons();renderStatus()};
+  const name=document.createElement('input');name.value=x.name;name.oninput=e=>{supplyOptions[i].name=e.target.value;saveSettings();renderSupplyButtons();renderStatus()};
+  const del=document.createElement('button');del.className='miniDelete';del.textContent='×';del.onclick=()=>{supplies=supplies.filter(id=>id!==x.id);supplyOptions.splice(i,1);saveSettings();renderSettings();renderSupplyButtons();renderStatus()};
+  row.append(icon,name,del);ss.appendChild(row);
+ });
+}
+
+function savePresentations(){
+ homeBaseStorage.setItem('oae-homebase-new-presentations',JSON.stringify(presentations));
+ homeBaseStorage.setItem('oae-homebase-new-active',active);
+ normalizePresentationFolders();savePresentationOrganization();
+}
+function renderManage(){
+ const list=$('#manageList'); if(!list)return;
+ renderManageFolders();
+ list.innerHTML='';
+ if(!presentations.length){
+  const e=document.createElement('div');e.className='hint';e.textContent='No saved presentations yet.';list.appendChild(e);return;
+ }
+ presentations.forEach((p,i)=>{
+  const row=document.createElement('div');
+  row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,155px) auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)';
+  const name=document.createElement('input');
+  name.type='text'; name.value=p.name; name.setAttribute('aria-label','Presentation title');
+  name.title='Edit presentation title';
+  name.style.cssText='width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-weight:700;color:var(--ink);background:#fff';
+  name.onchange=()=>{const next=name.value.trim();if(!next){name.value=p.name;return;}p.name=next;savePresentations();renderTabs();};
+  name.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();name.blur();}};
+
+  const colorWrap=document.createElement('div');colorWrap.className='voiceColorCompact';
+  const preview=document.createElement('div');preview.className='currentColorSwatch';preview.style.background=p.color||presentationFallbackColors[i%presentationFallbackColors.length];
+  const edit=document.createElement('button');edit.type='button';edit.className='colorEditBtn';edit.textContent='✎';edit.title='Edit presentation tab color';
+  const palette=document.createElement('div');palette.className='colorPalettePopover';
+  fillColorSwatches(palette,p.color,c=>{
+   p.color=c;savePresentations();renderTabs();renderManage();
+  });
+  edit.onclick=e=>{
+   e.stopPropagation();
+   $$('.colorPalettePopover.show').forEach(x=>{if(x!==palette)x.classList.remove('show')});
+   palette.classList.toggle('show');
+  };
+  colorWrap.append(preview,edit,palette);
+
+  const del=document.createElement('button');del.className='miniDelete';del.textContent='×';del.title='Remove from Home Base';
+  del.onclick=()=>{
+   presentations.splice(i,1);
+   if(active>=presentations.length)active=Math.max(0,presentations.length-1);
+   savePresentations();renderTabs();loadActive();renderManage();
+  };
+  const folderSelect=document.createElement('select');folderSelect.className='folderSelect';folderSelect.title='Presentation folder';
+  refreshFolderOptions(folderSelect,p.folderId);
+  folderSelect.onchange=()=>{if(folderSelect.value==='__create__'){openFolderModal(null,id=>movePresentationToFolder(p.frameId,id));folderSelect.value=p.folderId||'';}else movePresentationToFolder(p.frameId,folderSelect.value||null)};
+  row.append(name,folderSelect,colorWrap,del);list.appendChild(row);
+ });
+}
+function openFolderModal(id,onSaved){
+ const f=folders.find(x=>x.id===id);folderEditingId=id||null;folderDraftColor=f?.color||'#dcf6f5';
+ $('#folderModalTitle').textContent=f?'Edit Folder':'New Folder';$('#folderName').value=f?.name||'';$('#folderError').textContent='';
+ $('#folderColorPreview').style.background=folderDraftColor;
+ fillColorSwatches($('#folderColorPalette'),folderDraftColor,c=>{folderDraftColor=c;$('#folderColorPreview').style.background=c;$('#folderColorPalette').classList.remove('show')});
+ $('#folderColorEdit').onclick=e=>{e.stopPropagation();$('#folderColorPalette').classList.toggle('show')};
+ $('#folderSave').onclick=()=>{
+  const name=$('#folderName').value.trim();if(!name){$('#folderError').textContent='Please name the folder.';return}
+  let folder=f;
+  if(folder){folder.name=name;folder.color=folderDraftColor}
+  else{folder={id:uid('folder'),name,color:folderDraftColor};folders.push(folder);topOrder.push('f:'+folder.id)}
+  savePresentationOrganization();$('#folderModal').classList.remove('show');renderTabs();renderManage();
+  if(onSaved)onSaved(folder.id);
+ };
+ $('#folderModal').classList.add('show');$('#folderName').focus();
+}
+$('#folderModalClose').onclick=$('#folderCancel').onclick=()=>$('#folderModal').classList.remove('show');
+$('#folderModal').onclick=e=>{if(e.target===$('#folderModal'))$('#folderModal').classList.remove('show')};
+$('#addFolderManage').onclick=()=>openFolderModal(null);
+function renderManageFolders(){
+ const host=$('#manageFolders');host.innerHTML='';
+ if(!folders.length){const hint=document.createElement('div');hint.className='hint';hint.textContent='Folders are optional. Create one to organize your slides.';host.appendChild(hint)}
+ folders.forEach(f=>{
+  const row=document.createElement('div');row.className='folderManageRow';
+  const name=document.createElement('input');name.value=f.name;name.title='Folder name';name.onchange=()=>{if(name.value.trim()){f.name=name.value.trim();savePresentationOrganization();renderTabs()}else name.value=f.name};
+  const edit=document.createElement('button');edit.className='topbtn';edit.textContent='Color / Edit';edit.onclick=()=>openFolderModal(f.id);
+  const del=document.createElement('button');del.className='miniDelete';del.style.padding='0 10px';del.textContent='×';del.title='Delete folder';
+  del.onclick=()=>openFolderDeleteModal(f.id);
+  row.append(name,edit,del);host.appendChild(row);
+ });
+}
+let pendingFolderDeleteId=null;
+function closeFolderDeleteModal(){pendingFolderDeleteId=null;$('#folderDeleteModal').classList.remove('show')}
+function openFolderDeleteModal(id){
+ const f=folders.find(x=>x.id===id);if(!f)return;
+ pendingFolderDeleteId=id;
+ const count=presentations.filter(p=>p.folderId===id).length;
+ $('#folderDeleteIntro').textContent='What would you like to do with the folder “'+f.name+'”'+(count?' and its '+count+' presentation'+(count===1?'':'s'):'')+'?';
+ $('#folderDeleteChoices').style.display=count?'grid':'none';
+ const keep=$('#folderDeleteModal input[value="keep"]');keep.checked=true;
+ $('#folderDeleteConfirm').textContent='Delete Folder';
+ $('#folderDeleteModal').classList.add('show');
+}
+$('#folderDeleteClose').onclick=$('#folderDeleteCancel').onclick=closeFolderDeleteModal;
+$('#folderDeleteModal').onclick=e=>{if(e.target===$('#folderDeleteModal'))closeFolderDeleteModal()};
+$('#folderDeleteConfirm').onclick=()=>{
+ const id=pendingFolderDeleteId;if(!id)return;
+ const f=folders.find(x=>x.id===id);if(!f){closeFolderDeleteModal();return}
+ const count=presentations.filter(p=>p.folderId===id).length;
+ const mode=count?$('#folderDeleteModal input[name="folderDeleteMode"]:checked')?.value:'keep';
+ if(mode==='delete'){
+  const activeFrame=presentations[active]?.frameId;
+  presentations=presentations.filter(p=>p.folderId!==id);
+  active=Math.max(0,presentations.findIndex(p=>p.frameId===activeFrame));
+ }else presentations.forEach(p=>{if(p.folderId===id)p.folderId=null});
+ folders=folders.filter(x=>x.id!==id);topOrder=topOrder.filter(x=>x!=='f:'+id);
+ if(expandedFolder===id)expandedFolder=null;
+ normalizePresentationFolders();savePresentationOrganization();closeFolderDeleteModal();renderTabs();loadActive();renderManage();
+};
+$('#refreshPresentation').onclick=()=>{
+ if(!presentations.length)return;
+ const current=presentations[active];
+ if(!current)return;
+ const frame=viewerHost.querySelector('[data-frame-id="'+current.frameId+'"]');
+ if(!frame)return;
+ const src=embedUrl(current.url);
+ frame.src='about:blank';
+ setTimeout(()=>{frame.src=src;},40);
+};
+$('#manage').onclick=()=>{renderManage();$('#manageModal').classList.add('show')};
+$('#manageClose').onclick=()=>$('#manageModal').classList.remove('show');
+$('#manageModal').onclick=e=>{if(e.target===$('#manageModal'))$('#manageModal').classList.remove('show')};
+
+function wireBarColorEditors(){
+ const memoEdit=$('#memoColorEdit'),statusEdit=$('#statusBarColorEdit');
+ if(memoEdit)memoEdit.onclick=e=>{e.stopPropagation();$('#statusBarColorPalette')?.classList.remove('show');$('#memoColorPalette')?.classList.toggle('show')};
+ if(statusEdit)statusEdit.onclick=e=>{e.stopPropagation();$('#memoColorPalette')?.classList.remove('show');$('#statusBarColorPalette')?.classList.toggle('show')};
+}
+function openSettingsModal(){
+ classEditorMode='existing';classDraft=null;settingsClassId=activeClassId;
+ renderSettings();applyTimerSettings();applyMemoColor();applyStatusBarColor();applyStatusBarSize();updateClassListUI();wireBarColorEditors();
+ $('#settingsModal').classList.add('show');
+}
+function openClassesModal(){
+ closeClassMenu();classEditorMode='existing';classDraft=null;settingsClassId=activeClassId;
+ renderClassSettings();$('#classesModal').classList.add('show');
+}
+$('#manageClassesBtn').onclick=openClassesModal;
+$('#classesModalClose').onclick=$('#classesModalDone').onclick=()=>$('#classesModal').classList.remove('show');
+$('#classesModal').addEventListener('click',e=>{if(e.target===$('#classesModal'))$('#classesModal').classList.remove('show')});
+if($('#settingsTop'))$('#settingsTop').onclick=openSettingsModal;
+$('#settingsClose').onclick=$('#settingsDone').onclick=()=>$('#settingsModal').classList.remove('show');
+$('#settingsModal').addEventListener('click',e=>{if(!e.target.closest('.colorEditWrap,.voiceColorCompact'))$$('.colorPalettePopover.show').forEach(x=>x.classList.remove('show'))});
+$$('input[name="timerMode"]').forEach(r=>r.onchange=()=>{timerMode=r.value;homeBaseStorage.setItem('oae-timer-mode',timerMode);applyTimerSettings()});
+$('#timerChime').onchange=e=>{timerChimeEnabled=e.target.checked;homeBaseStorage.setItem('oae-timer-chime',String(timerChimeEnabled))};
+$$('input[name="statusBarSize"]').forEach(r=>r.onchange=()=>{statusBarSize=r.value;homeBaseStorage.setItem('oae-status-bar-size',statusBarSize);applyStatusBarSize();renderStatus()});
+$('#addVoice').onclick=()=>{const n=$('#voiceNumNew').value.trim(),w=$('#voiceWordNew').value.trim();if(!w)return;voiceOptions.push({num:n,word:w,color:voicePalette[voiceOptions.length%voicePalette.length]});$('#voiceNumNew').value='';$('#voiceWordNew').value='';saveSettings();renderSettings();renderVoiceButtons()};
+$('#addSupply').onclick=()=>{const icon=$('#supplyIconNew').value.trim()||'⭐',name=$('#supplyNameNew').value.trim();if(!name)return;const pastels=[['#fde3ec','#ee8eb0'],['#dcf6f5','#68c9c6'],['#eee3fb','#ae8bdd'],['#fff1c9','#e9bd51'],['#ffe2cf','#ed9a62'],['#e4f4d9','#92c978']];const pc=pastels[supplyOptions.length%pastels.length];supplyOptions.push({id:'custom-'+Date.now(),icon,name,color:pc[0],border:pc[1]});$('#supplyIconNew').value='';$('#supplyNameNew').value='';saveSettings();renderSettings();renderSupplyButtons()};
+
+
+// Drag and resize the student-facing timer inside the presentation area.
+(()=>{
+ const timer=$('#timerOverlay');
+ const resize=$('#timerResize');
+ const stage=timer.parentElement;
+ let dragging=false,resizing=false,offsetX=0,offsetY=0,startX=0,startW=0;
+
+ timer.addEventListener('pointerdown',e=>{
+   if(e.target===resize || e.target.closest('.overlayClose,.timerQuickControls,.timerPlaybackRow,button'))return;
+   if(e.button!==undefined && e.button!==0)return;
+   const tr=timer.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+   timer.style.left=(tr.left-sr.left)+'px';timer.style.top=(tr.top-sr.top)+'px';timer.style.right='auto';
+   offsetX=e.clientX-tr.left;offsetY=e.clientY-tr.top;
+   dragging=true;timer.classList.add('dragging');timer.setPointerCapture?.(e.pointerId);e.preventDefault();
+ });
+ timer.addEventListener('pointermove',e=>{
+   if(!dragging)return;
+   const sr=stage.getBoundingClientRect(),w=timer.offsetWidth,h=timer.offsetHeight;
+   timer.style.left=Math.max(0,Math.min(sr.width-w,e.clientX-sr.left-offsetX))+'px';
+   timer.style.top=Math.max(0,Math.min(sr.height-h,e.clientY-sr.top-offsetY))+'px';
+ });
+ const stopDrag=e=>{if(!dragging)return;dragging=false;timer.classList.remove('dragging');try{timer.releasePointerCapture?.(e.pointerId)}catch(_){}};
+ timer.addEventListener('pointerup',stopDrag);timer.addEventListener('pointercancel',stopDrag);
+
+ resize.addEventListener('pointerdown',e=>{
+   e.stopPropagation();resizing=true;startX=e.clientX;startW=timer.offsetWidth;
+   resize.setPointerCapture?.(e.pointerId);e.preventDefault();
+ });
+ resize.addEventListener('pointermove',e=>{
+   if(!resizing)return;
+   const sr=stage.getBoundingClientRect();
+   const left=timer.getBoundingClientRect().left-sr.left;
+   timerWidth=Math.max(125,Math.min(360,sr.width-left,startW+(e.clientX-startX)));
+   timer.style.width=timerWidth+'px';
+   timer.style.setProperty('--timer-scale',Math.max(.85,Math.min(1.7,timerWidth/170)));
+ });
+ const stopResize=e=>{
+   if(!resizing)return;resizing=false;
+   homeBaseStorage.setItem('oae-timer-width',String(Math.round(timerWidth)));
+   try{resize.releasePointerCapture?.(e.pointerId)}catch(_){}
+ };
+ resize.addEventListener('pointerup',stopResize);resize.addEventListener('pointercancel',stopResize);
+})();
+applyTimerSettings();syncTimerPauseButton();
+
+// Drag and resize the student-facing clock.
+(()=>{
+ const box=$('#clockOverlay'),resize=$('#clockResize'),stage=box.parentElement;
+ let dragging=false,resizing=false,offsetX=0,offsetY=0,startX=0,startW=0;
+ box.style.width=Math.max(130,Math.min(360,clockWidth))+'px';box.style.setProperty('--clock-scale',Math.max(.85,Math.min(1.7,clockWidth/190)));
+ box.addEventListener('pointerdown',e=>{if(e.target===resize||e.target.closest('.overlayClose'))return;if(e.button!==undefined&&e.button!==0)return;const br=box.getBoundingClientRect(),sr=stage.getBoundingClientRect();box.style.left=(br.left-sr.left)+'px';box.style.top=(br.top-sr.top)+'px';box.style.right='auto';offsetX=e.clientX-br.left;offsetY=e.clientY-br.top;dragging=true;box.classList.add('dragging');box.setPointerCapture?.(e.pointerId);e.preventDefault()});
+ box.addEventListener('pointermove',e=>{if(!dragging)return;const sr=stage.getBoundingClientRect(),w=box.offsetWidth,h=box.offsetHeight;box.style.left=Math.max(0,Math.min(sr.width-w,e.clientX-sr.left-offsetX))+'px';box.style.top=Math.max(0,Math.min(sr.height-h,e.clientY-sr.top-offsetY))+'px'});
+ const stop=e=>{if(!dragging)return;dragging=false;box.classList.remove('dragging');try{box.releasePointerCapture?.(e.pointerId)}catch(_){}};box.addEventListener('pointerup',stop);box.addEventListener('pointercancel',stop);
+ resize.addEventListener('pointerdown',e=>{e.stopPropagation();resizing=true;startX=e.clientX;startW=box.offsetWidth;resize.setPointerCapture?.(e.pointerId);e.preventDefault()});
+ resize.addEventListener('pointermove',e=>{if(!resizing)return;const sr=stage.getBoundingClientRect(),left=box.getBoundingClientRect().left-sr.left;clockWidth=Math.max(130,Math.min(360,sr.width-left,startW+(e.clientX-startX)));box.style.width=clockWidth+'px';box.style.setProperty('--clock-scale',Math.max(.85,Math.min(1.7,clockWidth/190)))});
+ const stopResize=e=>{if(!resizing)return;resizing=false;homeBaseStorage.setItem('oae-clock-width',String(Math.round(clockWidth)));try{resize.releasePointerCapture?.(e.pointerId)}catch(_){}};resize.addEventListener('pointerup',stopResize);resize.addEventListener('pointercancel',stopResize);
+})();
+
+// Drag and resize the student-facing stopwatch.
+(()=>{
+ const swBox=$('#stopwatchOverlay'),resize=$('#swResize'),stage=swBox.parentElement;
+ let dragging=false,resizing=false,offsetX=0,offsetY=0,startX=0,startW=0;
+ swBox.style.width=Math.max(125,Math.min(360,swWidth))+'px';
+ swBox.style.setProperty('--sw-scale',Math.max(.85,Math.min(1.7,swWidth/170)));
+
+ swBox.addEventListener('pointerdown',e=>{
+  if(e.target===resize || e.target.closest('.overlayClose,.timerQuickControls,.timerPlaybackRow,button'))return;
+  if(e.button!==undefined&&e.button!==0)return;
+  const br=swBox.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  swBox.style.left=(br.left-sr.left)+'px';swBox.style.top=(br.top-sr.top)+'px';swBox.style.right='auto';
+  offsetX=e.clientX-br.left;offsetY=e.clientY-br.top;dragging=true;swBox.classList.add('dragging');
+  swBox.setPointerCapture?.(e.pointerId);e.preventDefault();
+ });
+ swBox.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const sr=stage.getBoundingClientRect(),w=swBox.offsetWidth,h=swBox.offsetHeight;
+  swBox.style.left=Math.max(0,Math.min(sr.width-w,e.clientX-sr.left-offsetX))+'px';
+  swBox.style.top=Math.max(0,Math.min(sr.height-h,e.clientY-sr.top-offsetY))+'px';
+ });
+ const stopDrag=e=>{if(!dragging)return;dragging=false;swBox.classList.remove('dragging');try{swBox.releasePointerCapture?.(e.pointerId)}catch(_){}};
+ swBox.addEventListener('pointerup',stopDrag);swBox.addEventListener('pointercancel',stopDrag);
+
+ resize.addEventListener('pointerdown',e=>{e.stopPropagation();resizing=true;startX=e.clientX;startW=swBox.offsetWidth;resize.setPointerCapture?.(e.pointerId);e.preventDefault()});
+ resize.addEventListener('pointermove',e=>{
+  if(!resizing)return;
+  const sr=stage.getBoundingClientRect(),left=swBox.getBoundingClientRect().left-sr.left;
+  swWidth=Math.max(125,Math.min(360,sr.width-left,startW+(e.clientX-startX)));
+  swBox.style.width=swWidth+'px';swBox.style.setProperty('--sw-scale',Math.max(.85,Math.min(1.7,swWidth/170)));
+ });
+ const stopResize=e=>{if(!resizing)return;resizing=false;homeBaseStorage.setItem('oae-stopwatch-width',String(Math.round(swWidth)));try{resize.releasePointerCapture?.(e.pointerId)}catch(_){}};
+ resize.addEventListener('pointerup',stopResize);resize.addEventListener('pointercancel',stopResize);
+})();
+
+
+
+
+// Keep presentation tabs visible while the utility header and left tools collapse.
+function refreshPresentationAfterLayout(){
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  window.dispatchEvent(new Event('resize'));
+ }));
+}
+function syncUtilityChrome(){
+ const collapsed=$('#app').classList.contains('collapsed');
+ $('#topChrome').classList.toggle('chromeHidden',collapsed);
+}
+
+
+$('#tipsFaqBtn').onclick=()=>$('#tipsFaqModal').classList.add('show');
+$('#tipsFaqClose').onclick=()=>$('#tipsFaqModal').classList.remove('show');
+$('#tipsFaqModal').onclick=e=>{if(e.target===$('#tipsFaqModal'))$('#tipsFaqModal').classList.remove('show')};
+
+$('#fullscreen').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
+document.addEventListener('fullscreenchange',()=>{$('#fullscreen').textContent=document.fullscreenElement?'⛶ Exit Full Screen':'⛶ Full Screen'});
+function setToolsCollapsed(collapsed){
+ $('#app').classList.toggle('collapsed',collapsed);
+ syncUtilityChrome();
+ setTimeout(refreshPresentationAfterLayout,80);
+}
+$('#collapse').onclick=()=>setToolsCollapsed(true);
+$('#showTools').onclick=()=>setToolsCollapsed(false);
+
+
+
+const stageBarObserver=new MutationObserver(syncStageBars);
+if($('#memoBanner'))stageBarObserver.observe($('#memoBanner'),{attributes:true,childList:true,subtree:true});
+if($('#statusStrip'))stageBarObserver.observe($('#statusStrip'),{attributes:true,childList:true,subtree:true});
+window.addEventListener('resize',syncStageBars);
+syncStageBars();
+
+
+function makeResultOverlayDraggable(box){
+ const stage=box.parentElement;
+ let dragging=false,offsetX=0,offsetY=0;
+ box.addEventListener('pointerdown',e=>{
+  if(e.target.closest('button'))return;
+  if(e.button!==undefined&&e.button!==0)return;
+  const br=box.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  box.style.left=(br.left-sr.left)+'px';
+  box.style.top=(br.top-sr.top)+'px';
+  box.style.right='auto';box.style.bottom='auto';box.style.transform='none';
+  offsetX=e.clientX-br.left;offsetY=e.clientY-br.top;
+  dragging=true;box.classList.add('dragging');
+  box.setPointerCapture?.(e.pointerId);e.preventDefault();
+ });
+ box.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const sr=stage.getBoundingClientRect();
+  const maxX=Math.max(0,stage.clientWidth-box.offsetWidth);
+  const maxY=Math.max(0,stage.clientHeight-box.offsetHeight);
+  const x=Math.max(0,Math.min(maxX,e.clientX-sr.left-offsetX));
+  const y=Math.max(0,Math.min(maxY,e.clientY-sr.top-offsetY));
+  box.style.left=x+'px';box.style.top=y+'px';
+ });
+ const stop=e=>{if(!dragging)return;dragging=false;box.classList.remove('dragging');try{box.releasePointerCapture?.(e.pointerId)}catch(_){}};
+ box.addEventListener('pointerup',stop);box.addEventListener('pointercancel',stop);
+}
+makeResultOverlayDraggable($('#pickerResultOverlay'));
+makeResultOverlayDraggable($('#groupsResultOverlay'));
+
+
+function makeResultOverlayResizable(box,handle,minW,minH){
+ let resizing=false,startX=0,startY=0,startW=0,startH=0;
+ handle.addEventListener('pointerdown',e=>{
+  e.stopPropagation();e.preventDefault();
+  const r=box.getBoundingClientRect();
+  box.style.width=r.width+'px';box.style.height=r.height+'px';
+  box.style.maxWidth='none';box.style.maxHeight='none';
+  startX=e.clientX;startY=e.clientY;startW=r.width;startH=r.height;
+  resizing=true;handle.setPointerCapture?.(e.pointerId);
+ });
+ handle.addEventListener('pointermove',e=>{
+  if(!resizing)return;
+  const stage=box.parentElement;
+  const br=box.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  const maxW=Math.max(minW,sr.right-br.left);
+  const maxH=Math.max(minH,sr.bottom-br.top);
+  box.style.width=Math.max(minW,Math.min(maxW,startW+(e.clientX-startX)))+'px';
+  box.style.height=Math.max(minH,Math.min(maxH,startH+(e.clientY-startY)))+'px';
+  if(box.id==='pickerResultOverlay')fitPickerName();
+  if(box.id==='groupsResultOverlay'){
+   groupsManualResize=true;
+   fitGroupsOverlay();
+  }
+ });
+ const stop=e=>{if(!resizing)return;resizing=false;try{handle.releasePointerCapture?.(e.pointerId)}catch(_){}};
+ handle.addEventListener('pointerup',stop);handle.addEventListener('pointercancel',stop);
+}
+makeResultOverlayResizable($('#pickerResultOverlay'),$('#pickerResultResize'),220,130);
+makeResultOverlayResizable($('#groupsResultOverlay'),$('#groupsResultResize'),300,180);
+
+
+function fitPickerName(){
+ const box=$('#pickerResultOverlay'),name=$('#pickerResultName');
+ if(!box||!name||!box.classList.contains('show'))return;
+ const label=box.querySelector('.pickerResultLabel');
+ const controls=box.querySelector('.resultQuickControls');
+ const pad=32;
+ const availableW=Math.max(80,box.clientWidth-pad);
+ const usedH=(label?.offsetHeight||0)+(controls?.offsetHeight||0)+48;
+ const availableH=Math.max(38,box.clientHeight-usedH);
+
+ // Names should stay on ONE line. Fit the full word/name to the available width.
+ name.style.whiteSpace='nowrap';
+ name.style.overflowWrap='normal';
+ name.style.wordBreak='normal';
+ name.style.width='auto';
+ name.style.maxWidth='100%';
+
+ let lo=18,hi=Math.min(120,Math.max(32,availableH));
+ for(let i=0;i<10;i++){
+  const mid=(lo+hi)/2;
+  name.style.fontSize=mid+'px';
+  if(name.scrollWidth<=availableW && name.scrollHeight<=availableH)lo=mid;
+  else hi=mid;
+ }
+ name.style.fontSize=Math.floor(lo)+'px';
+}
+
+
+function fitGroupsOverlay(){
+ const box=$('#groupsResultOverlay'),grid=$('#groupsGrid');
+ if(!box||!grid||!box.classList.contains('show'))return;
+ const cards=[...grid.children];
+ if(!cards.length)return;
+
+ const title=box.querySelector('.groupsTitle');
+ const controls=box.querySelector('.resultQuickControls');
+ const count=cards.length;
+ const availableW=Math.max(180,box.clientWidth-32);
+ const availableH=Math.max(100,box.clientHeight-(title?.offsetHeight||0)-(controls?.offsetHeight||0)-34);
+
+ // Balanced fixed grid: every group gets the SAME size box.
+ let cols=count<=4?2:count<=6?3:count<=8?4:count<=12?4:5;
+ cols=Math.min(cols,count);
+ let rows=Math.ceil(count/cols);
+
+ // If the teacher manually resizes, choose an alternate balanced grid only when
+ // it clearly gives each group more usable area.
+ let best={cols,rows,area:0};
+ for(let c=1;c<=Math.min(count,6);c++){
+  const r=Math.ceil(count/c);
+  const cw=(availableW-8*(c-1))/c;
+  const ch=(availableH-8*(r-1))/r;
+  if(cw<115||ch<72)continue;
+  const area=Math.min(cw/1.55,ch)*Math.min(cw,ch*1.8);
+  if(area>best.area)best={cols:c,rows:r,area};
+ }
+ cols=best.cols;rows=best.rows;
+
+ const gap=8;
+ const cardW=(availableW-gap*(cols-1))/cols;
+ const cardH=(availableH-gap*(rows-1))/rows;
+ const maxNames=Math.max(...cards.map(card=>card.querySelectorAll('div').length),1);
+ const largeGroupMode=(count<=3 && maxNames>=6);
+ box.classList.toggle('largeGroupMode',largeGroupMode);
+ box.classList.toggle('manualGroupResize',!!groupsManualResize);
+
+ // Projector-first typography. With two students in a tall card, names should be LARGE.
+ let fitFont=Math.min(44,cardW/5.2,(cardH-24)/(maxNames+1)*1.02);
+ // When there are only 2–3 large groups, prioritize across-the-room readability.
+ // The popout already grows taller for these, so use that extra height for names.
+ if(count<=3 && maxNames>=6){
+  fitFont=Math.min(44,cardW/4.4,(cardH-20)/(maxNames+1)*1.10);
+ }
+ if(groupsManualResize && largeGroupMode){
+  // Use the teacher-resized OUTER box, not the old content-height grid, to calculate
+  // the new projector font size. This makes names visibly grow as the popout grows.
+  const resizedCardW=(box.clientWidth-40-8*(cols-1))/cols;
+  const resizedCardH=(box.clientHeight-(title?.offsetHeight||28)-(controls?.offsetHeight||30)-58)/rows;
+  const widthFont=resizedCardW/3.9;
+  const heightFont=(resizedCardH-18)/(maxNames+1)*1.18;
+  fitFont=Math.min(56,widthFont,heightFont);
+ }
+ const studentFont=Math.max(maxNames>6?19:20,fitFont);
+ const groupFont=Math.max(15,Math.min(26,studentFont*.66));
+ box.style.setProperty('--group-student-font',studentFont+'px');
+ box.style.setProperty('--group-label-font',groupFont+'px');
+
+ grid.style.display='grid';
+ grid.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;
+ grid.style.gridTemplateRows=largeGroupMode?'none':`repeat(${rows},minmax(0,1fr))`;
+ grid.style.gridAutoRows=largeGroupMode?'auto':'1fr';
+ grid.style.gap=gap+'px';
+ grid.style.width='100%';
+ if(groupsManualResize&&largeGroupMode){
+  const freeH=Math.max(100,box.clientHeight-(title?.offsetHeight||28)-(controls?.offsetHeight||30)-54);
+  grid.style.height=freeH+'px';
+ }else{
+  grid.style.height='100%';
+ }
+ grid.style.alignItems='stretch';grid.style.alignContent='stretch';
+
+ cards.forEach(card=>{
+  card.style.width='auto';card.style.height='auto';
+  card.style.minWidth='0';card.style.minHeight='0';
+  card.style.boxSizing='border-box';
+  card.style.padding='10px 12px';
+  if(largeGroupMode){
+   const namesInCard=card.querySelectorAll('div').length;
+   const neededH=20 + groupFont*1.1 + 5 + namesInCard*studentFont*1.08 + 20;
+   card.style.minHeight=Math.ceil(neededH)+'px';
+   if(groupsManualResize){
+    card.style.height='100%';
+    card.style.justifyContent='center';
+   }else{
+    card.style.height='auto';
+    card.style.justifyContent='flex-start';
+   }
+  }else{
+   card.style.minHeight='0';
+  }
+  card.style.overflow='hidden';
+  card.style.display='flex';
+  card.style.flexDirection='column';
+  card.style.justifyContent='center';
+
+  const head=card.querySelector('b');
+  if(head){
+   
+   head.style.lineHeight='1.05';
+   head.style.marginBottom='5px';
+   head.style.whiteSpace='nowrap';
+  }
+  card.querySelectorAll('div').forEach(el=>{
+   
+   el.style.lineHeight='1.08';
+   el.style.whiteSpace='nowrap';
+   el.style.overflow='hidden';
+   el.style.textOverflow='ellipsis';
+  });
+ });
+}
+
+
+function sizeGroupsOverlayForContent(){
+ const box=$('#groupsResultOverlay'),grid=$('#groupsGrid');
+ if(!box||!grid||!box.classList.contains('show'))return;
+ const cards=[...grid.children];
+ if(!cards.length)return;
+
+ const stage=box.parentElement;
+ const count=cards.length;
+ const maxNames=Math.max(...cards.map(card=>card.querySelectorAll('div').length),1);
+
+ // Keep the default partners/small-group launch we like.
+ let cols=count<=4?2:count<=6?3:count<=8?4:count<=12?4:5;
+ cols=Math.min(cols,count);
+ const rows=Math.ceil(count/cols);
+
+ const desiredW=Math.min(stage.clientWidth*.90,Math.max(420,cols*190+48));
+
+ // Base height works well for partners. If a card contains many names (for
+ // example 12 students in each of 2 groups), grow the popout vertically so
+ // every name remains visible at projector-friendly size.
+ const minNameLine=(count<=3 && maxNames>=6)?34:28;
+ const cardNeededH=Math.max(125, 42 + maxNames*minNameLine);
+ const desiredH=Math.min(
+  stage.clientHeight*.90,
+  Math.max(250, rows*cardNeededH + (rows-1)*8 + 112)
+ );
+
+ box.style.width=Math.round(desiredW)+'px';
+ box.style.height=Math.round(desiredH)+'px';
+ box.style.maxWidth='none';box.style.maxHeight='none';
+ box.style.left='50%';box.style.top='50%';box.style.right='auto';box.style.bottom='auto';
+ box.style.transform='translate(-50%,-50%)';
+
+ grid.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;
+ requestAnimationFrame(()=>{
+  fitGroupsOverlay();
+  requestAnimationFrame(cropGroupsOverlayToContent);
+ });
+}
+
+
+function cropGroupsOverlayToContent(){
+ const box=$('#groupsResultOverlay'),grid=$('#groupsGrid');
+ if(!box||!grid||!box.classList.contains('show'))return;
+ const cards=[...grid.children];
+ if(!cards.length)return;
+
+ const stage=box.parentElement;
+ const title=box.querySelector('.groupsTitle');
+ const controls=box.querySelector('.resultQuickControls');
+
+ // In large-group mode the cards have already been sized to show every student.
+ // The outer white box should simply hug title + cards + Shuffle.
+ if(box.classList.contains('largeGroupMode')){
+  const titleH=title?.offsetHeight||28;
+  const gridH=grid.scrollHeight;
+  const controlsH=controls?.offsetHeight||30;
+  const desiredH=titleH + gridH + controlsH + 54;
+  box.style.height=Math.min(desiredH,stage.clientHeight*.92)+'px';
+  return;
+ }
+
+ // Normal partners/small groups: crop around the rendered equal-size grid.
+ const boxRect=box.getBoundingClientRect();
+ let cardsBottom=0;
+ cards.forEach(card=>{
+  const r=card.getBoundingClientRect();
+  cardsBottom=Math.max(cardsBottom,r.bottom-boxRect.top);
+ });
+ const controlsH=controls?.offsetHeight||30;
+ box.style.height=Math.min(Math.ceil(cardsBottom+12+controlsH+18),stage.clientHeight*.90)+'px';
+ requestAnimationFrame(fitGroupsOverlay);
+}
+
+let groupsManualResize=false;
+
+// Bookmark library: separate from presentation tabs, local-only storage.
+const BOOKMARK_KEY='oae-homebase-bookmarks';
+const bookmarkPalette=['#fde3ec','#ffe2cf','#fff1c9','#dcf6f5','#e3f0f8','#eee3fb','#e4f4d9'];
+let bookmarks=[];
+try{const saved=JSON.parse(homeBaseStorage.getItem(BOOKMARK_KEY)||'[]');if(Array.isArray(saved))bookmarks=saved.filter(v=>v&&typeof v.url==='string');}catch(e){}
+let editingBookmark=-1, selectedBookmarkColor=bookmarkPalette[4], bookmarkDragIndex=-1;
+function bookmarkUrl(raw){try{const value=raw.trim();if(!value)return null;const url=new URL(/^https?:\/\//i.test(value)?value:'https://'+value);if(!['https:','http:'].includes(url.protocol)||!url.hostname.includes('.'))return null;return url.href;}catch(e){return null;}}
+function saveBookmarks(){homeBaseStorage.setItem(BOOKMARK_KEY,JSON.stringify(bookmarks));renderBookmarks();}
+function renderBookmarkColors(){const host=$('#videoColorChoices');host.replaceChildren();bookmarkPalette.forEach(color=>{const b=document.createElement('button');b.type='button';b.className='videoColorChoice'+(selectedBookmarkColor===color?' chosen':'');b.style.background=color;b.title='Choose color';b.onclick=()=>{selectedBookmarkColor=color;renderBookmarkColors();};host.append(b);});}
+function resetBookmarkForm(){editingBookmark=-1;$('#videoTitleInput').value='';$('#videoUrlInput').value='';$('#videoFormHeading').textContent='Add Bookmark';$('#saveVideoBtn').textContent='Save Bookmark';$('#videoFormError').textContent='';selectedBookmarkColor=bookmarkPalette[4];$('#videoEditor').hidden=true;$('#addVideoBtn').hidden=false;renderBookmarkColors();}
+function editBookmark(i=-1){editingBookmark=i;const v=i>=0?bookmarks[i]:null;$('#videoTitleInput').value=v?v.title:'';$('#videoUrlInput').value=v?v.url:'';selectedBookmarkColor=v?(v.color||bookmarkPalette[4]):bookmarkPalette[4];$('#videoFormHeading').textContent=v?'Edit Bookmark':'Add Bookmark';$('#saveVideoBtn').textContent=v?'Save Changes':'Save Bookmark';$('#videoFormError').textContent='';$('#videoEditor').hidden=false;$('#addVideoBtn').hidden=true;renderBookmarkColors();$('#videoTitleInput').focus();}
+function openBookmark(i){const v=bookmarks[i];if(v&&bookmarkUrl(v.url))window.open(bookmarkUrl(v.url),'_blank','noopener,noreferrer');}
+function renderBookmarks(){const list=$('#savedVideoList');list.replaceChildren();if(!bookmarks.length){const empty=document.createElement('div');empty.className='savedVideoEmpty';empty.textContent='No bookmarks saved yet.';list.append(empty);return;}
+bookmarks.forEach((v,i)=>{const row=document.createElement('div');row.className='savedVideoRow';row.style.setProperty('--video-color',v.color||bookmarkPalette[4]);row.draggable=true;
+const handle=document.createElement('span');handle.className='videoDragHandle';handle.textContent='⠿';handle.title='Drag to reorder';handle.setAttribute('aria-label','Drag to reorder');row.append(handle);
+const title=document.createElement('button');title.className='savedVideoTitle';title.type='button';title.textContent=v.title;title.title='Open '+v.title+' in new tab';title.onclick=()=>openBookmark(i);row.append(title);
+const actions=document.createElement('div');actions.className='savedVideoActions';
+const buttons=[['↗','Open bookmark',()=>openBookmark(i),''],['✎','Edit bookmark',()=>editBookmark(i),''],['TRASH_ICON','Delete bookmark',()=>{if(window.confirm('Delete bookmark "'+v.title+'"?')){bookmarks.splice(i,1);saveBookmarks();resetBookmarkForm();}},'videoDelete']];
+buttons.forEach(([symbol,tip,fn,cls])=>{const btn=document.createElement('button');btn.type='button';if(symbol==='TRASH_ICON')btn.innerHTML='<svg class="bookmarkTrashIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 4h4M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg>';else btn.textContent=symbol;btn.title=tip;btn.setAttribute('aria-label',tip);btn.className=cls;btn.onclick=e=>{e.preventDefault();e.stopPropagation();fn();};actions.append(btn);});row.append(actions);
+row.addEventListener('dragstart',e=>{bookmarkDragIndex=i;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(i));});
+row.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';row.classList.add('dragOver');});
+row.addEventListener('dragleave',()=>row.classList.remove('dragOver'));
+row.addEventListener('drop',e=>{e.preventDefault();const from=bookmarkDragIndex;bookmarkDragIndex=-1;if(from<0||from===i)return;const [item]=bookmarks.splice(from,1);bookmarks.splice(i,0,item);saveBookmarks();resetBookmarkForm();});
+row.addEventListener('dragend',()=>{bookmarkDragIndex=-1;document.querySelectorAll('.savedVideoRow').forEach(el=>el.classList.remove('dragging','dragOver'));});list.append(row);});}
+$('#addVideoBtn').onclick=()=>editBookmark();
+$('#saveVideoBtn').onclick=()=>{const title=$('#videoTitleInput').value.trim(),url=bookmarkUrl($('#videoUrlInput').value);if(!title){$('#videoFormError').textContent='Enter a bookmark title.';return;}if(!url){$('#videoFormError').textContent='Enter a valid website link.';return;}const entry={title,url,color:selectedBookmarkColor};if(editingBookmark>=0)bookmarks[editingBookmark]=entry;else bookmarks.push(entry);saveBookmarks();resetBookmarkForm();};
+$('#cancelVideoEditBtn').onclick=resetBookmarkForm;
+renderBookmarkColors();renderBookmarks();
+</script>
+<script>
+(function(){
+ const tabs=document.getElementById('timeModeTabs');
+ const timer=document.getElementById('timerDrawer');
+ const stopwatch=document.getElementById('stopwatchDrawer');
+ const tool=document.querySelector('[data-drawer="timerDrawer"]');
+ const chooseTimer=document.getElementById('chooseTimer');
+ const chooseStopwatch=document.getElementById('chooseStopwatch');
+ let mode='timer',expanded=false;
+ function render(){
+   tabs.style.display=expanded?'flex':'none';
+   timer.classList.toggle('show',expanded&&mode==='timer');
+   stopwatch.classList.toggle('show',expanded&&mode==='stopwatch');
+   tool.classList.toggle('active',expanded);
+   chooseTimer.classList.toggle('active',mode==='timer');
+   chooseStopwatch.classList.toggle('active',mode==='stopwatch');
+ }
+ // Handle this combined tool before the generic drawer listener.
+ tool.addEventListener('click',e=>{e.stopImmediatePropagation();expanded=!expanded;render();},true);
+ chooseTimer.addEventListener('click',()=>{mode='timer';expanded=true;render()});
+ chooseStopwatch.addEventListener('click',()=>{mode='stopwatch';expanded=true;render()});
+ document.querySelectorAll('[data-drawer]').forEach(btn=>{
+   if(btn!==tool)btn.addEventListener('click',()=>{expanded=false;render()});
+ });
+ render();
+})();
+</script></body></html>
